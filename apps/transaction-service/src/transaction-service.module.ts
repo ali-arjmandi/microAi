@@ -27,6 +27,8 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
         RABBITMQ_VERSION: Joi.string().optional(),
         OUTBOX_POLL_INTERVAL_MS: Joi.number().default(2000),
         OUTBOX_BATCH_SIZE: Joi.number().default(100),
+        OUTBOX_MAX_RETRIES: Joi.number().default(5),
+        OUTBOX_RETRY_BASE_MS: Joi.number().default(1000),
       }),
     }),
     DatabaseModule,
