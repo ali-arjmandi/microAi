@@ -15,12 +15,14 @@
     "@grpc/grpc-js": "^1.14.3",
     "@grpc/proto-loader": "^0.8.0",
     "@nestjs/common": "^9.0.0",
+    "@nestjs/config": "2",
     "@nestjs/core": "^9.0.0",
     "@nestjs/microservices": "9",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/swagger": "6",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
+    "joi": "^18.1.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
     "swagger-ui-express": "^5.0.1"
@@ -41,4 +43,3 @@
     "typescript": "5.9.3"
   }
 }
-

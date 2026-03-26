@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import * as Joi from 'joi';
 import { DatabaseModule } from './modules/database/prisma.module';
 import { HealthController } from './health/health.controller';
 import { OutboxModule } from './modules/outbox/outbox.module';
@@ -6,7 +8,25 @@ import { TransactionsGrpcController } from './modules/transactions/transactions.
 import { TransactionsModule } from './modules/transactions/transactions.module';
 
 @Module({
-  imports: [DatabaseModule, TransactionsModule, OutboxModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validationSchema: Joi.object({
+        DATABASE_URL: Joi.string()
+          .uri({ scheme: ['postgres', 'postgresql'] })
+          .required(),
+        TRANSACTION_SERVICE_HOST: Joi.string().default('0.0.0.0'),
+        TRANSACTION_SERVICE_PORT: Joi.number().port().default(50051),
+        RABBITMQ_URL: Joi.string()
+          .uri({ scheme: ['amqp', 'amqps'] })
+          .required(),
+        OUTBOX_EXCHANGE: Joi.string().default('transaction.events'),
+      }),
+    }),
+    DatabaseModule,
+    TransactionsModule,
+    OutboxModule,
+  ],
   controllers: [TransactionsGrpcController, HealthController],
   providers: [],
 })

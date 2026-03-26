@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import * as Joi from 'joi';
 import { SearchServiceController } from './search-service.controller';
 import { SearchServiceService } from './search-service.service';
 import { HealthController } from './health/health.controller';
@@ -7,7 +9,18 @@ import { IndexingService } from './indexing/indexing.service';
 import { mapTransactionEventToSearchDocument } from './indexing/document.mapper';
 
 @Module({
-  imports: [],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validationSchema: Joi.object({
+        PORT: Joi.number().port().default(3003),
+        ELASTICSEARCH_NODE: Joi.string().uri({ scheme: ['http', 'https'] }).required(),
+        ELASTICSEARCH_INDEX: Joi.string().default('transactions'),
+        RABBITMQ_URL: Joi.string().uri({ scheme: ['amqp', 'amqps'] }).required(),
+        RABBITMQ_QUEUE: Joi.string().default('transaction.events'),
+      }),
+    }),
+  ],
   controllers: [SearchServiceController, HealthController],
   providers: [
     SearchServiceService,

@@ -1,11 +1,21 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import * as Joi from 'joi';
 import { ApiGatewayController } from './api-gateway.controller';
 import { ApiGatewayService } from './api-gateway.service';
 import { resolve } from 'path';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validationSchema: Joi.object({
+        PORT: Joi.number().port().default(3000),
+        TRANSACTION_SERVICE_HOST: Joi.string().hostname().default('localhost'),
+        TRANSACTION_SERVICE_PORT: Joi.number().port().default(50051),
+      }),
+    }),
     ClientsModule.register([
       {
         name: 'TRANSACTION_GRPC',
