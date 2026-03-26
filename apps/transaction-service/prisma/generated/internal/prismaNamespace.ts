@@ -596,10 +596,24 @@ export const TransactionScalarFieldEnum = {
   id: 'id',
   title: 'title',
   propertyAddress: 'propertyAddress',
+  description: 'description',
   price: 'price',
   buyerId: 'buyerId',
   sellerId: 'sellerId',
   state: 'state',
+  aiStatus: 'aiStatus',
+  searchStatus: 'searchStatus',
+  moderationStatus: 'moderationStatus',
+  summary: 'summary',
+  improvedDescription: 'improvedDescription',
+  riskScore: 'riskScore',
+  riskNarrative: 'riskNarrative',
+  moderationReason: 'moderationReason',
+  moderationConfidence: 'moderationConfidence',
+  searchTags: 'searchTags',
+  aiModelVersion: 'aiModelVersion',
+  aiPromptVersion: 'aiPromptVersion',
+  version: 'version',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -629,6 +643,14 @@ export const SortOrder = {
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const JsonNullValueInput = {
@@ -712,16 +734,44 @@ export type ListEnumTransactionStateFieldRefInput<$PrismaModel> = FieldRefInputT
 
 
 /**
- * Reference to a field of type 'DateTime'
+ * Reference to a field of type 'AiProcessingStatus'
  */
-export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+export type EnumAiProcessingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AiProcessingStatus'>
     
 
 
 /**
- * Reference to a field of type 'DateTime[]'
+ * Reference to a field of type 'AiProcessingStatus[]'
  */
-export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+export type ListEnumAiProcessingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AiProcessingStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'SearchIndexStatus'
+ */
+export type EnumSearchIndexStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SearchIndexStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'SearchIndexStatus[]'
+ */
+export type ListEnumSearchIndexStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SearchIndexStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ModerationStatus'
+ */
+export type EnumModerationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ModerationStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ModerationStatus[]'
+ */
+export type ListEnumModerationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ModerationStatus[]'>
     
 
 
@@ -740,20 +790,6 @@ export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
 
 
 /**
- * Reference to a field of type 'OutboxStatus'
- */
-export type EnumOutboxStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OutboxStatus'>
-    
-
-
-/**
- * Reference to a field of type 'OutboxStatus[]'
- */
-export type ListEnumOutboxStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OutboxStatus[]'>
-    
-
-
-/**
  * Reference to a field of type 'Int'
  */
 export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -764,6 +800,34 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DateTime'
+ */
+export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+    
+
+
+/**
+ * Reference to a field of type 'DateTime[]'
+ */
+export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'OutboxStatus'
+ */
+export type EnumOutboxStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OutboxStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'OutboxStatus[]'
+ */
+export type ListEnumOutboxStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OutboxStatus[]'>
     
 
 

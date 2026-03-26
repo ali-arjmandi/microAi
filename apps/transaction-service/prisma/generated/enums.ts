@@ -10,10 +10,44 @@
 */
 
 export const TransactionState = {
-  INITIATED: 'INITIATED'
+  INITIATED: 'INITIATED',
+  AI_PROCESSING: 'AI_PROCESSING',
+  REJECTED_MODERATION: 'REJECTED_MODERATION',
+  READY: 'READY',
+  FAILED: 'FAILED'
 } as const
 
 export type TransactionState = (typeof TransactionState)[keyof typeof TransactionState]
+
+
+export const AiProcessingStatus = {
+  PENDING: 'PENDING',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED'
+} as const
+
+export type AiProcessingStatus = (typeof AiProcessingStatus)[keyof typeof AiProcessingStatus]
+
+
+export const SearchIndexStatus = {
+  PENDING: 'PENDING',
+  INDEXED_BASE: 'INDEXED_BASE',
+  INDEXED_ENRICHED: 'INDEXED_ENRICHED',
+  FAILED: 'FAILED'
+} as const
+
+export type SearchIndexStatus = (typeof SearchIndexStatus)[keyof typeof SearchIndexStatus]
+
+
+export const ModerationStatus = {
+  PENDING: 'PENDING',
+  ALLOW: 'ALLOW',
+  REVIEW: 'REVIEW',
+  REJECT: 'REJECT'
+} as const
+
+export type ModerationStatus = (typeof ModerationStatus)[keyof typeof ModerationStatus]
 
 
 export const OutboxStatus = {

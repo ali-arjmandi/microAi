@@ -28,20 +28,39 @@ export type AggregateTransaction = {
 
 export type TransactionAvgAggregateOutputType = {
   price: runtime.Decimal | null
+  riskScore: runtime.Decimal | null
+  moderationConfidence: runtime.Decimal | null
+  version: number | null
 }
 
 export type TransactionSumAggregateOutputType = {
   price: runtime.Decimal | null
+  riskScore: runtime.Decimal | null
+  moderationConfidence: runtime.Decimal | null
+  version: number | null
 }
 
 export type TransactionMinAggregateOutputType = {
   id: string | null
   title: string | null
   propertyAddress: string | null
+  description: string | null
   price: runtime.Decimal | null
   buyerId: string | null
   sellerId: string | null
   state: $Enums.TransactionState | null
+  aiStatus: $Enums.AiProcessingStatus | null
+  searchStatus: $Enums.SearchIndexStatus | null
+  moderationStatus: $Enums.ModerationStatus | null
+  summary: string | null
+  improvedDescription: string | null
+  riskScore: runtime.Decimal | null
+  riskNarrative: string | null
+  moderationReason: string | null
+  moderationConfidence: runtime.Decimal | null
+  aiModelVersion: string | null
+  aiPromptVersion: string | null
+  version: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -50,10 +69,23 @@ export type TransactionMaxAggregateOutputType = {
   id: string | null
   title: string | null
   propertyAddress: string | null
+  description: string | null
   price: runtime.Decimal | null
   buyerId: string | null
   sellerId: string | null
   state: $Enums.TransactionState | null
+  aiStatus: $Enums.AiProcessingStatus | null
+  searchStatus: $Enums.SearchIndexStatus | null
+  moderationStatus: $Enums.ModerationStatus | null
+  summary: string | null
+  improvedDescription: string | null
+  riskScore: runtime.Decimal | null
+  riskNarrative: string | null
+  moderationReason: string | null
+  moderationConfidence: runtime.Decimal | null
+  aiModelVersion: string | null
+  aiPromptVersion: string | null
+  version: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -62,10 +94,24 @@ export type TransactionCountAggregateOutputType = {
   id: number
   title: number
   propertyAddress: number
+  description: number
   price: number
   buyerId: number
   sellerId: number
   state: number
+  aiStatus: number
+  searchStatus: number
+  moderationStatus: number
+  summary: number
+  improvedDescription: number
+  riskScore: number
+  riskNarrative: number
+  moderationReason: number
+  moderationConfidence: number
+  searchTags: number
+  aiModelVersion: number
+  aiPromptVersion: number
+  version: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -74,20 +120,39 @@ export type TransactionCountAggregateOutputType = {
 
 export type TransactionAvgAggregateInputType = {
   price?: true
+  riskScore?: true
+  moderationConfidence?: true
+  version?: true
 }
 
 export type TransactionSumAggregateInputType = {
   price?: true
+  riskScore?: true
+  moderationConfidence?: true
+  version?: true
 }
 
 export type TransactionMinAggregateInputType = {
   id?: true
   title?: true
   propertyAddress?: true
+  description?: true
   price?: true
   buyerId?: true
   sellerId?: true
   state?: true
+  aiStatus?: true
+  searchStatus?: true
+  moderationStatus?: true
+  summary?: true
+  improvedDescription?: true
+  riskScore?: true
+  riskNarrative?: true
+  moderationReason?: true
+  moderationConfidence?: true
+  aiModelVersion?: true
+  aiPromptVersion?: true
+  version?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -96,10 +161,23 @@ export type TransactionMaxAggregateInputType = {
   id?: true
   title?: true
   propertyAddress?: true
+  description?: true
   price?: true
   buyerId?: true
   sellerId?: true
   state?: true
+  aiStatus?: true
+  searchStatus?: true
+  moderationStatus?: true
+  summary?: true
+  improvedDescription?: true
+  riskScore?: true
+  riskNarrative?: true
+  moderationReason?: true
+  moderationConfidence?: true
+  aiModelVersion?: true
+  aiPromptVersion?: true
+  version?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -108,10 +186,24 @@ export type TransactionCountAggregateInputType = {
   id?: true
   title?: true
   propertyAddress?: true
+  description?: true
   price?: true
   buyerId?: true
   sellerId?: true
   state?: true
+  aiStatus?: true
+  searchStatus?: true
+  moderationStatus?: true
+  summary?: true
+  improvedDescription?: true
+  riskScore?: true
+  riskNarrative?: true
+  moderationReason?: true
+  moderationConfidence?: true
+  searchTags?: true
+  aiModelVersion?: true
+  aiPromptVersion?: true
+  version?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -207,10 +299,24 @@ export type TransactionGroupByOutputType = {
   id: string
   title: string
   propertyAddress: string
+  description: string | null
   price: runtime.Decimal
   buyerId: string
   sellerId: string
   state: $Enums.TransactionState
+  aiStatus: $Enums.AiProcessingStatus
+  searchStatus: $Enums.SearchIndexStatus
+  moderationStatus: $Enums.ModerationStatus
+  summary: string | null
+  improvedDescription: string | null
+  riskScore: runtime.Decimal | null
+  riskNarrative: string | null
+  moderationReason: string | null
+  moderationConfidence: runtime.Decimal | null
+  searchTags: runtime.JsonValue | null
+  aiModelVersion: string | null
+  aiPromptVersion: string | null
+  version: number
   createdAt: Date
   updatedAt: Date
   _count: TransactionCountAggregateOutputType | null
@@ -242,10 +348,24 @@ export type TransactionWhereInput = {
   id?: Prisma.StringFilter<"Transaction"> | string
   title?: Prisma.StringFilter<"Transaction"> | string
   propertyAddress?: Prisma.StringFilter<"Transaction"> | string
+  description?: Prisma.StringNullableFilter<"Transaction"> | string | null
   price?: Prisma.DecimalFilter<"Transaction"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   buyerId?: Prisma.StringFilter<"Transaction"> | string
   sellerId?: Prisma.StringFilter<"Transaction"> | string
   state?: Prisma.EnumTransactionStateFilter<"Transaction"> | $Enums.TransactionState
+  aiStatus?: Prisma.EnumAiProcessingStatusFilter<"Transaction"> | $Enums.AiProcessingStatus
+  searchStatus?: Prisma.EnumSearchIndexStatusFilter<"Transaction"> | $Enums.SearchIndexStatus
+  moderationStatus?: Prisma.EnumModerationStatusFilter<"Transaction"> | $Enums.ModerationStatus
+  summary?: Prisma.StringNullableFilter<"Transaction"> | string | null
+  improvedDescription?: Prisma.StringNullableFilter<"Transaction"> | string | null
+  riskScore?: Prisma.DecimalNullableFilter<"Transaction"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  riskNarrative?: Prisma.StringNullableFilter<"Transaction"> | string | null
+  moderationReason?: Prisma.StringNullableFilter<"Transaction"> | string | null
+  moderationConfidence?: Prisma.DecimalNullableFilter<"Transaction"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  searchTags?: Prisma.JsonNullableFilter<"Transaction">
+  aiModelVersion?: Prisma.StringNullableFilter<"Transaction"> | string | null
+  aiPromptVersion?: Prisma.StringNullableFilter<"Transaction"> | string | null
+  version?: Prisma.IntFilter<"Transaction"> | number
   createdAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
 }
@@ -254,10 +374,24 @@ export type TransactionOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   propertyAddress?: Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrder
   buyerId?: Prisma.SortOrder
   sellerId?: Prisma.SortOrder
   state?: Prisma.SortOrder
+  aiStatus?: Prisma.SortOrder
+  searchStatus?: Prisma.SortOrder
+  moderationStatus?: Prisma.SortOrder
+  summary?: Prisma.SortOrderInput | Prisma.SortOrder
+  improvedDescription?: Prisma.SortOrderInput | Prisma.SortOrder
+  riskScore?: Prisma.SortOrderInput | Prisma.SortOrder
+  riskNarrative?: Prisma.SortOrderInput | Prisma.SortOrder
+  moderationReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  moderationConfidence?: Prisma.SortOrderInput | Prisma.SortOrder
+  searchTags?: Prisma.SortOrderInput | Prisma.SortOrder
+  aiModelVersion?: Prisma.SortOrderInput | Prisma.SortOrder
+  aiPromptVersion?: Prisma.SortOrderInput | Prisma.SortOrder
+  version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -269,10 +403,24 @@ export type TransactionWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.TransactionWhereInput | Prisma.TransactionWhereInput[]
   title?: Prisma.StringFilter<"Transaction"> | string
   propertyAddress?: Prisma.StringFilter<"Transaction"> | string
+  description?: Prisma.StringNullableFilter<"Transaction"> | string | null
   price?: Prisma.DecimalFilter<"Transaction"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   buyerId?: Prisma.StringFilter<"Transaction"> | string
   sellerId?: Prisma.StringFilter<"Transaction"> | string
   state?: Prisma.EnumTransactionStateFilter<"Transaction"> | $Enums.TransactionState
+  aiStatus?: Prisma.EnumAiProcessingStatusFilter<"Transaction"> | $Enums.AiProcessingStatus
+  searchStatus?: Prisma.EnumSearchIndexStatusFilter<"Transaction"> | $Enums.SearchIndexStatus
+  moderationStatus?: Prisma.EnumModerationStatusFilter<"Transaction"> | $Enums.ModerationStatus
+  summary?: Prisma.StringNullableFilter<"Transaction"> | string | null
+  improvedDescription?: Prisma.StringNullableFilter<"Transaction"> | string | null
+  riskScore?: Prisma.DecimalNullableFilter<"Transaction"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  riskNarrative?: Prisma.StringNullableFilter<"Transaction"> | string | null
+  moderationReason?: Prisma.StringNullableFilter<"Transaction"> | string | null
+  moderationConfidence?: Prisma.DecimalNullableFilter<"Transaction"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  searchTags?: Prisma.JsonNullableFilter<"Transaction">
+  aiModelVersion?: Prisma.StringNullableFilter<"Transaction"> | string | null
+  aiPromptVersion?: Prisma.StringNullableFilter<"Transaction"> | string | null
+  version?: Prisma.IntFilter<"Transaction"> | number
   createdAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
 }, "id">
@@ -281,10 +429,24 @@ export type TransactionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   propertyAddress?: Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrder
   buyerId?: Prisma.SortOrder
   sellerId?: Prisma.SortOrder
   state?: Prisma.SortOrder
+  aiStatus?: Prisma.SortOrder
+  searchStatus?: Prisma.SortOrder
+  moderationStatus?: Prisma.SortOrder
+  summary?: Prisma.SortOrderInput | Prisma.SortOrder
+  improvedDescription?: Prisma.SortOrderInput | Prisma.SortOrder
+  riskScore?: Prisma.SortOrderInput | Prisma.SortOrder
+  riskNarrative?: Prisma.SortOrderInput | Prisma.SortOrder
+  moderationReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  moderationConfidence?: Prisma.SortOrderInput | Prisma.SortOrder
+  searchTags?: Prisma.SortOrderInput | Prisma.SortOrder
+  aiModelVersion?: Prisma.SortOrderInput | Prisma.SortOrder
+  aiPromptVersion?: Prisma.SortOrderInput | Prisma.SortOrder
+  version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.TransactionCountOrderByAggregateInput
@@ -301,10 +463,24 @@ export type TransactionScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Transaction"> | string
   title?: Prisma.StringWithAggregatesFilter<"Transaction"> | string
   propertyAddress?: Prisma.StringWithAggregatesFilter<"Transaction"> | string
+  description?: Prisma.StringNullableWithAggregatesFilter<"Transaction"> | string | null
   price?: Prisma.DecimalWithAggregatesFilter<"Transaction"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   buyerId?: Prisma.StringWithAggregatesFilter<"Transaction"> | string
   sellerId?: Prisma.StringWithAggregatesFilter<"Transaction"> | string
   state?: Prisma.EnumTransactionStateWithAggregatesFilter<"Transaction"> | $Enums.TransactionState
+  aiStatus?: Prisma.EnumAiProcessingStatusWithAggregatesFilter<"Transaction"> | $Enums.AiProcessingStatus
+  searchStatus?: Prisma.EnumSearchIndexStatusWithAggregatesFilter<"Transaction"> | $Enums.SearchIndexStatus
+  moderationStatus?: Prisma.EnumModerationStatusWithAggregatesFilter<"Transaction"> | $Enums.ModerationStatus
+  summary?: Prisma.StringNullableWithAggregatesFilter<"Transaction"> | string | null
+  improvedDescription?: Prisma.StringNullableWithAggregatesFilter<"Transaction"> | string | null
+  riskScore?: Prisma.DecimalNullableWithAggregatesFilter<"Transaction"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  riskNarrative?: Prisma.StringNullableWithAggregatesFilter<"Transaction"> | string | null
+  moderationReason?: Prisma.StringNullableWithAggregatesFilter<"Transaction"> | string | null
+  moderationConfidence?: Prisma.DecimalNullableWithAggregatesFilter<"Transaction"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  searchTags?: Prisma.JsonNullableWithAggregatesFilter<"Transaction">
+  aiModelVersion?: Prisma.StringNullableWithAggregatesFilter<"Transaction"> | string | null
+  aiPromptVersion?: Prisma.StringNullableWithAggregatesFilter<"Transaction"> | string | null
+  version?: Prisma.IntWithAggregatesFilter<"Transaction"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Transaction"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Transaction"> | Date | string
 }
@@ -313,10 +489,24 @@ export type TransactionCreateInput = {
   id?: string
   title: string
   propertyAddress: string
+  description?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   buyerId: string
   sellerId: string
   state?: $Enums.TransactionState
+  aiStatus?: $Enums.AiProcessingStatus
+  searchStatus?: $Enums.SearchIndexStatus
+  moderationStatus?: $Enums.ModerationStatus
+  summary?: string | null
+  improvedDescription?: string | null
+  riskScore?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  riskNarrative?: string | null
+  moderationReason?: string | null
+  moderationConfidence?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  searchTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  aiModelVersion?: string | null
+  aiPromptVersion?: string | null
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -325,10 +515,24 @@ export type TransactionUncheckedCreateInput = {
   id?: string
   title: string
   propertyAddress: string
+  description?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   buyerId: string
   sellerId: string
   state?: $Enums.TransactionState
+  aiStatus?: $Enums.AiProcessingStatus
+  searchStatus?: $Enums.SearchIndexStatus
+  moderationStatus?: $Enums.ModerationStatus
+  summary?: string | null
+  improvedDescription?: string | null
+  riskScore?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  riskNarrative?: string | null
+  moderationReason?: string | null
+  moderationConfidence?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  searchTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  aiModelVersion?: string | null
+  aiPromptVersion?: string | null
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -337,10 +541,24 @@ export type TransactionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   propertyAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   buyerId?: Prisma.StringFieldUpdateOperationsInput | string
   sellerId?: Prisma.StringFieldUpdateOperationsInput | string
   state?: Prisma.EnumTransactionStateFieldUpdateOperationsInput | $Enums.TransactionState
+  aiStatus?: Prisma.EnumAiProcessingStatusFieldUpdateOperationsInput | $Enums.AiProcessingStatus
+  searchStatus?: Prisma.EnumSearchIndexStatusFieldUpdateOperationsInput | $Enums.SearchIndexStatus
+  moderationStatus?: Prisma.EnumModerationStatusFieldUpdateOperationsInput | $Enums.ModerationStatus
+  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  improvedDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riskScore?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  riskNarrative?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderationConfidence?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  searchTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  aiModelVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiPromptVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -349,10 +567,24 @@ export type TransactionUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   propertyAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   buyerId?: Prisma.StringFieldUpdateOperationsInput | string
   sellerId?: Prisma.StringFieldUpdateOperationsInput | string
   state?: Prisma.EnumTransactionStateFieldUpdateOperationsInput | $Enums.TransactionState
+  aiStatus?: Prisma.EnumAiProcessingStatusFieldUpdateOperationsInput | $Enums.AiProcessingStatus
+  searchStatus?: Prisma.EnumSearchIndexStatusFieldUpdateOperationsInput | $Enums.SearchIndexStatus
+  moderationStatus?: Prisma.EnumModerationStatusFieldUpdateOperationsInput | $Enums.ModerationStatus
+  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  improvedDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riskScore?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  riskNarrative?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderationConfidence?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  searchTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  aiModelVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiPromptVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -361,10 +593,24 @@ export type TransactionCreateManyInput = {
   id?: string
   title: string
   propertyAddress: string
+  description?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   buyerId: string
   sellerId: string
   state?: $Enums.TransactionState
+  aiStatus?: $Enums.AiProcessingStatus
+  searchStatus?: $Enums.SearchIndexStatus
+  moderationStatus?: $Enums.ModerationStatus
+  summary?: string | null
+  improvedDescription?: string | null
+  riskScore?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  riskNarrative?: string | null
+  moderationReason?: string | null
+  moderationConfidence?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  searchTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  aiModelVersion?: string | null
+  aiPromptVersion?: string | null
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -373,10 +619,24 @@ export type TransactionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   propertyAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   buyerId?: Prisma.StringFieldUpdateOperationsInput | string
   sellerId?: Prisma.StringFieldUpdateOperationsInput | string
   state?: Prisma.EnumTransactionStateFieldUpdateOperationsInput | $Enums.TransactionState
+  aiStatus?: Prisma.EnumAiProcessingStatusFieldUpdateOperationsInput | $Enums.AiProcessingStatus
+  searchStatus?: Prisma.EnumSearchIndexStatusFieldUpdateOperationsInput | $Enums.SearchIndexStatus
+  moderationStatus?: Prisma.EnumModerationStatusFieldUpdateOperationsInput | $Enums.ModerationStatus
+  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  improvedDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riskScore?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  riskNarrative?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderationConfidence?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  searchTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  aiModelVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiPromptVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -385,10 +645,24 @@ export type TransactionUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   propertyAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   buyerId?: Prisma.StringFieldUpdateOperationsInput | string
   sellerId?: Prisma.StringFieldUpdateOperationsInput | string
   state?: Prisma.EnumTransactionStateFieldUpdateOperationsInput | $Enums.TransactionState
+  aiStatus?: Prisma.EnumAiProcessingStatusFieldUpdateOperationsInput | $Enums.AiProcessingStatus
+  searchStatus?: Prisma.EnumSearchIndexStatusFieldUpdateOperationsInput | $Enums.SearchIndexStatus
+  moderationStatus?: Prisma.EnumModerationStatusFieldUpdateOperationsInput | $Enums.ModerationStatus
+  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  improvedDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riskScore?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  riskNarrative?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderationConfidence?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  searchTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  aiModelVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiPromptVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -397,26 +671,56 @@ export type TransactionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   propertyAddress?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   price?: Prisma.SortOrder
   buyerId?: Prisma.SortOrder
   sellerId?: Prisma.SortOrder
   state?: Prisma.SortOrder
+  aiStatus?: Prisma.SortOrder
+  searchStatus?: Prisma.SortOrder
+  moderationStatus?: Prisma.SortOrder
+  summary?: Prisma.SortOrder
+  improvedDescription?: Prisma.SortOrder
+  riskScore?: Prisma.SortOrder
+  riskNarrative?: Prisma.SortOrder
+  moderationReason?: Prisma.SortOrder
+  moderationConfidence?: Prisma.SortOrder
+  searchTags?: Prisma.SortOrder
+  aiModelVersion?: Prisma.SortOrder
+  aiPromptVersion?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type TransactionAvgOrderByAggregateInput = {
   price?: Prisma.SortOrder
+  riskScore?: Prisma.SortOrder
+  moderationConfidence?: Prisma.SortOrder
+  version?: Prisma.SortOrder
 }
 
 export type TransactionMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   propertyAddress?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   price?: Prisma.SortOrder
   buyerId?: Prisma.SortOrder
   sellerId?: Prisma.SortOrder
   state?: Prisma.SortOrder
+  aiStatus?: Prisma.SortOrder
+  searchStatus?: Prisma.SortOrder
+  moderationStatus?: Prisma.SortOrder
+  summary?: Prisma.SortOrder
+  improvedDescription?: Prisma.SortOrder
+  riskScore?: Prisma.SortOrder
+  riskNarrative?: Prisma.SortOrder
+  moderationReason?: Prisma.SortOrder
+  moderationConfidence?: Prisma.SortOrder
+  aiModelVersion?: Prisma.SortOrder
+  aiPromptVersion?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -425,20 +729,40 @@ export type TransactionMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   propertyAddress?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   price?: Prisma.SortOrder
   buyerId?: Prisma.SortOrder
   sellerId?: Prisma.SortOrder
   state?: Prisma.SortOrder
+  aiStatus?: Prisma.SortOrder
+  searchStatus?: Prisma.SortOrder
+  moderationStatus?: Prisma.SortOrder
+  summary?: Prisma.SortOrder
+  improvedDescription?: Prisma.SortOrder
+  riskScore?: Prisma.SortOrder
+  riskNarrative?: Prisma.SortOrder
+  moderationReason?: Prisma.SortOrder
+  moderationConfidence?: Prisma.SortOrder
+  aiModelVersion?: Prisma.SortOrder
+  aiPromptVersion?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type TransactionSumOrderByAggregateInput = {
   price?: Prisma.SortOrder
+  riskScore?: Prisma.SortOrder
+  moderationConfidence?: Prisma.SortOrder
+  version?: Prisma.SortOrder
 }
 
 export type StringFieldUpdateOperationsInput = {
   set?: string
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
 }
 
 export type DecimalFieldUpdateOperationsInput = {
@@ -453,6 +777,34 @@ export type EnumTransactionStateFieldUpdateOperationsInput = {
   set?: $Enums.TransactionState
 }
 
+export type EnumAiProcessingStatusFieldUpdateOperationsInput = {
+  set?: $Enums.AiProcessingStatus
+}
+
+export type EnumSearchIndexStatusFieldUpdateOperationsInput = {
+  set?: $Enums.SearchIndexStatus
+}
+
+export type EnumModerationStatusFieldUpdateOperationsInput = {
+  set?: $Enums.ModerationStatus
+}
+
+export type NullableDecimalFieldUpdateOperationsInput = {
+  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
@@ -463,10 +815,24 @@ export type TransactionSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   id?: boolean
   title?: boolean
   propertyAddress?: boolean
+  description?: boolean
   price?: boolean
   buyerId?: boolean
   sellerId?: boolean
   state?: boolean
+  aiStatus?: boolean
+  searchStatus?: boolean
+  moderationStatus?: boolean
+  summary?: boolean
+  improvedDescription?: boolean
+  riskScore?: boolean
+  riskNarrative?: boolean
+  moderationReason?: boolean
+  moderationConfidence?: boolean
+  searchTags?: boolean
+  aiModelVersion?: boolean
+  aiPromptVersion?: boolean
+  version?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["transaction"]>
@@ -475,10 +841,24 @@ export type TransactionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   id?: boolean
   title?: boolean
   propertyAddress?: boolean
+  description?: boolean
   price?: boolean
   buyerId?: boolean
   sellerId?: boolean
   state?: boolean
+  aiStatus?: boolean
+  searchStatus?: boolean
+  moderationStatus?: boolean
+  summary?: boolean
+  improvedDescription?: boolean
+  riskScore?: boolean
+  riskNarrative?: boolean
+  moderationReason?: boolean
+  moderationConfidence?: boolean
+  searchTags?: boolean
+  aiModelVersion?: boolean
+  aiPromptVersion?: boolean
+  version?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["transaction"]>
@@ -487,10 +867,24 @@ export type TransactionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   id?: boolean
   title?: boolean
   propertyAddress?: boolean
+  description?: boolean
   price?: boolean
   buyerId?: boolean
   sellerId?: boolean
   state?: boolean
+  aiStatus?: boolean
+  searchStatus?: boolean
+  moderationStatus?: boolean
+  summary?: boolean
+  improvedDescription?: boolean
+  riskScore?: boolean
+  riskNarrative?: boolean
+  moderationReason?: boolean
+  moderationConfidence?: boolean
+  searchTags?: boolean
+  aiModelVersion?: boolean
+  aiPromptVersion?: boolean
+  version?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["transaction"]>
@@ -499,15 +893,29 @@ export type TransactionSelectScalar = {
   id?: boolean
   title?: boolean
   propertyAddress?: boolean
+  description?: boolean
   price?: boolean
   buyerId?: boolean
   sellerId?: boolean
   state?: boolean
+  aiStatus?: boolean
+  searchStatus?: boolean
+  moderationStatus?: boolean
+  summary?: boolean
+  improvedDescription?: boolean
+  riskScore?: boolean
+  riskNarrative?: boolean
+  moderationReason?: boolean
+  moderationConfidence?: boolean
+  searchTags?: boolean
+  aiModelVersion?: boolean
+  aiPromptVersion?: boolean
+  version?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type TransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "propertyAddress" | "price" | "buyerId" | "sellerId" | "state" | "createdAt" | "updatedAt", ExtArgs["result"]["transaction"]>
+export type TransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "propertyAddress" | "description" | "price" | "buyerId" | "sellerId" | "state" | "aiStatus" | "searchStatus" | "moderationStatus" | "summary" | "improvedDescription" | "riskScore" | "riskNarrative" | "moderationReason" | "moderationConfidence" | "searchTags" | "aiModelVersion" | "aiPromptVersion" | "version" | "createdAt" | "updatedAt", ExtArgs["result"]["transaction"]>
 
 export type $TransactionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Transaction"
@@ -516,10 +924,24 @@ export type $TransactionPayload<ExtArgs extends runtime.Types.Extensions.Interna
     id: string
     title: string
     propertyAddress: string
+    description: string | null
     price: runtime.Decimal
     buyerId: string
     sellerId: string
     state: $Enums.TransactionState
+    aiStatus: $Enums.AiProcessingStatus
+    searchStatus: $Enums.SearchIndexStatus
+    moderationStatus: $Enums.ModerationStatus
+    summary: string | null
+    improvedDescription: string | null
+    riskScore: runtime.Decimal | null
+    riskNarrative: string | null
+    moderationReason: string | null
+    moderationConfidence: runtime.Decimal | null
+    searchTags: runtime.JsonValue | null
+    aiModelVersion: string | null
+    aiPromptVersion: string | null
+    version: number
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["transaction"]>
@@ -948,10 +1370,24 @@ export interface TransactionFieldRefs {
   readonly id: Prisma.FieldRef<"Transaction", 'String'>
   readonly title: Prisma.FieldRef<"Transaction", 'String'>
   readonly propertyAddress: Prisma.FieldRef<"Transaction", 'String'>
+  readonly description: Prisma.FieldRef<"Transaction", 'String'>
   readonly price: Prisma.FieldRef<"Transaction", 'Decimal'>
   readonly buyerId: Prisma.FieldRef<"Transaction", 'String'>
   readonly sellerId: Prisma.FieldRef<"Transaction", 'String'>
   readonly state: Prisma.FieldRef<"Transaction", 'TransactionState'>
+  readonly aiStatus: Prisma.FieldRef<"Transaction", 'AiProcessingStatus'>
+  readonly searchStatus: Prisma.FieldRef<"Transaction", 'SearchIndexStatus'>
+  readonly moderationStatus: Prisma.FieldRef<"Transaction", 'ModerationStatus'>
+  readonly summary: Prisma.FieldRef<"Transaction", 'String'>
+  readonly improvedDescription: Prisma.FieldRef<"Transaction", 'String'>
+  readonly riskScore: Prisma.FieldRef<"Transaction", 'Decimal'>
+  readonly riskNarrative: Prisma.FieldRef<"Transaction", 'String'>
+  readonly moderationReason: Prisma.FieldRef<"Transaction", 'String'>
+  readonly moderationConfidence: Prisma.FieldRef<"Transaction", 'Decimal'>
+  readonly searchTags: Prisma.FieldRef<"Transaction", 'Json'>
+  readonly aiModelVersion: Prisma.FieldRef<"Transaction", 'String'>
+  readonly aiPromptVersion: Prisma.FieldRef<"Transaction", 'String'>
+  readonly version: Prisma.FieldRef<"Transaction", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Transaction", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Transaction", 'DateTime'>
 }

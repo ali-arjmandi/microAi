@@ -75,10 +75,24 @@ export const TransactionScalarFieldEnum = {
   id: 'id',
   title: 'title',
   propertyAddress: 'propertyAddress',
+  description: 'description',
   price: 'price',
   buyerId: 'buyerId',
   sellerId: 'sellerId',
   state: 'state',
+  aiStatus: 'aiStatus',
+  searchStatus: 'searchStatus',
+  moderationStatus: 'moderationStatus',
+  summary: 'summary',
+  improvedDescription: 'improvedDescription',
+  riskScore: 'riskScore',
+  riskNarrative: 'riskNarrative',
+  moderationReason: 'moderationReason',
+  moderationConfidence: 'moderationConfidence',
+  searchTags: 'searchTags',
+  aiModelVersion: 'aiModelVersion',
+  aiPromptVersion: 'aiPromptVersion',
+  version: 'version',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -108,6 +122,14 @@ export const SortOrder = {
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const JsonNullValueInput = {
