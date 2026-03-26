@@ -1,13 +1,30 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
-  GetTransactionDto,
-  SearchTransactionsResponseDto,
-  TransactionResponseDto,
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
+import {
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  GetTransactionDto as CommonGetTransactionDto,
+  SearchTransactionsResponseDto as CommonSearchTransactionsResponseDto,
+  TransactionResponseDto as CommonTransactionResponseDto,
 } from '@app/common';
 import { ApiGatewayService } from './api-gateway.service';
 import { CreateTransactionRequestDto } from './dto/create-transaction-request.dto';
+import { CreateTransactionResponseDto } from './dto/create-transaction-response.dto';
+import { GetTransactionResponseDto } from './dto/get-transaction-response.dto';
 import { SearchTransactionsQueryRequestDto } from './dto/search-transactions-query-request.dto';
+import { SearchTransactionsResponseDto } from './dto/search-transactions-response.dto';
 
 @ApiTags('transactions')
 @Controller('transactions')
@@ -16,9 +33,13 @@ export class ApiGatewayController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new transaction' })
-  @ApiCreatedResponse({ type: TransactionResponseDto })
-  createTransaction(@Body() payload: CreateTransactionRequestDto): Promise<TransactionResponseDto> {
-    return this.apiGatewayService.createTransaction(payload);
+  @ApiCreatedResponse({ type: CreateTransactionResponseDto })
+  createTransaction(
+    @Body() payload: CreateTransactionRequestDto,
+  ): Promise<CreateTransactionResponseDto> {
+    return this.apiGatewayService
+      .createTransaction(payload)
+      .then((data) => this.toCreateTransactionResponse(data));
   }
 
   @Get('search/query')
@@ -28,13 +49,50 @@ export class ApiGatewayController {
   searchTransactions(
     @Query() query: SearchTransactionsQueryRequestDto,
   ): Promise<SearchTransactionsResponseDto> {
-    return this.apiGatewayService.searchTransactions(query);
+    return this.apiGatewayService
+      .searchTransactions(query)
+      .then((data) => this.toSearchTransactionsResponse(data));
   }
 
   @Get(':transactionId')
   @ApiOperation({ summary: 'Get a transaction by id' })
-  @ApiOkResponse({ type: GetTransactionDto })
-  getTransaction(@Param('transactionId') transactionId: string): Promise<GetTransactionDto> {
-    return this.apiGatewayService.getTransaction(transactionId);
+  @ApiOkResponse({ type: GetTransactionResponseDto })
+  getTransaction(
+    @Param('transactionId') transactionId: string,
+  ): Promise<GetTransactionResponseDto> {
+    return this.apiGatewayService
+      .getTransaction(transactionId)
+      .then((data) => this.toGetTransactionResponse(data));
+  }
+
+  private toCreateTransactionResponse(
+    data: CommonTransactionResponseDto,
+  ): CreateTransactionResponseDto {
+    return {
+      transactionId: data.transactionId,
+      state: data.state,
+    };
+  }
+
+  private toGetTransactionResponse(
+    data: CommonGetTransactionDto,
+  ): GetTransactionResponseDto {
+    return {
+      transactionId: data.transactionId,
+      title: data.title,
+      propertyAddress: data.propertyAddress,
+      price: data.price,
+      buyerId: data.buyerId,
+      sellerId: data.sellerId,
+      state: data.state,
+    };
+  }
+
+  private toSearchTransactionsResponse(
+    data: CommonSearchTransactionsResponseDto,
+  ): SearchTransactionsResponseDto {
+    return {
+      items: data.items.map((item) => this.toGetTransactionResponse(item)),
+    };
   }
 }
