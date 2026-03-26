@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
+import { resolve } from 'path';
 import { DatabaseModule } from './modules/database/prisma.module';
 import { HealthController } from './health/health.controller';
 import { OutboxModule } from './modules/outbox/outbox.module';
@@ -11,6 +12,7 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: [resolve(process.cwd(), 'apps/transaction-service/.env')],
       validationSchema: Joi.object({
         DATABASE_URL: Joi.string()
           .uri({ scheme: ['postgres', 'postgresql'] })

@@ -3,6 +3,6 @@ import { AiServiceModule } from './ai-service.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AiServiceModule);
-  await app.listen(3000);
+  await app.listen(process.env.PORT ?? 3004);
 }
 bootstrap();
