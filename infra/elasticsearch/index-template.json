@@ -1,0 +1,21 @@
+{
+  "index_patterns": ["transactions-*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "dynamic": true,
+      "properties": {
+        "id": { "type": "keyword" },
+        "status": { "type": "keyword" },
+        "createdAt": { "type": "date" },
+        "updatedAt": { "type": "date" }
+      }
+    }
+  },
+  "_meta": {
+    "description": "Placeholder template for searchable transaction documents."
+  }
+}
