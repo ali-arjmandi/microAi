@@ -11,13 +11,13 @@
   "monorepo": true,
   "root": "apps/microAgent",
   "projects": {
-    "microAgent": {
+    "ai-service": {
       "type": "application",
-      "root": "apps/microAgent",
+      "root": "apps/ai-service",
       "entryFile": "main",
-      "sourceRoot": "apps/microAgent/src",
+      "sourceRoot": "apps/ai-service/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/microAgent/tsconfig.app.json"
+        "tsConfigPath": "apps/ai-service/tsconfig.app.json"
       }
     },
     "api-gateway": {
@@ -29,24 +29,6 @@
         "tsConfigPath": "apps/api-gateway/tsconfig.app.json"
       }
     },
-    "transaction-service": {
-      "type": "application",
-      "root": "apps/transaction-service",
-      "entryFile": "main",
-      "sourceRoot": "apps/transaction-service/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/transaction-service/tsconfig.app.json"
-      }
-    },
-    "ai-service": {
-      "type": "application",
-      "root": "apps/ai-service",
-      "entryFile": "main",
-      "sourceRoot": "apps/ai-service/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/ai-service/tsconfig.app.json"
-      }
-    },
     "common": {
       "type": "library",
       "root": "libs/common",
@@ -54,6 +36,33 @@
       "sourceRoot": "libs/common/src",
       "compilerOptions": {
         "tsConfigPath": "libs/common/tsconfig.lib.json"
+      }
+    },
+    "microAgent": {
+      "type": "application",
+      "root": "apps/microAgent",
+      "entryFile": "main",
+      "sourceRoot": "apps/microAgent/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/microAgent/tsconfig.app.json"
+      }
+    },
+    "search-service": {
+      "type": "application",
+      "root": "apps/search-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/search-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/search-service/tsconfig.app.json"
+      }
+    },
+    "transaction-service": {
+      "type": "application",
+      "root": "apps/transaction-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/transaction-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/transaction-service/tsconfig.app.json"
       }
     }
   }

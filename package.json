@@ -8,6 +8,7 @@
   "scripts": {
     "build:api-gateway": "yarn --cwd apps/api-gateway build",
     "build:transaction-service": "yarn --cwd apps/transaction-service build",
+    "build:search-service": "yarn --cwd apps/search-service build",
     "build:ai-service": "yarn --cwd apps/ai-service build",
     "build:microAgent": "yarn --cwd apps/microAgent build",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
@@ -19,6 +20,10 @@
     "start:dev:transaction-service": "yarn --cwd apps/transaction-service start:dev",
     "start:debug:transaction-service": "yarn --cwd apps/transaction-service start:debug",
     "start:prod:transaction-service": "yarn --cwd apps/transaction-service start:prod",
+    "start:search-service": "yarn --cwd apps/search-service start",
+    "start:dev:search-service": "yarn --cwd apps/search-service start:dev",
+    "start:debug:search-service": "yarn --cwd apps/search-service start:debug",
+    "start:prod:search-service": "yarn --cwd apps/search-service start:prod",
     "start:ai-service": "yarn --cwd apps/ai-service start",
     "start:dev:ai-service": "yarn --cwd apps/ai-service start:dev",
     "start:debug:ai-service": "yarn --cwd apps/ai-service start:debug",
