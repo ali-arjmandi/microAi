@@ -3,8 +3,10 @@ import { OutboxProcessor } from './outbox.processor';
 import { OutboxPublisher } from './outbox.publisher';
 import { OutboxService } from './outbox.service';
 import { OutboxRepository } from './outbox.repository';
+import { RabbitMqModule } from '../rabbitmq/rabbitmq.module';
 
 @Module({
+  imports: [RabbitMqModule],
   providers: [
     OutboxService,
     OutboxPublisher,

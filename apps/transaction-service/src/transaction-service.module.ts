@@ -23,7 +23,8 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
         RABBITMQ_URL: Joi.string()
           .uri({ scheme: ['amqp', 'amqps'] })
           .required(),
-        OUTBOX_EXCHANGE: Joi.string().default('transactions.events.v1'),
+        OUTBOX_EXCHANGE: Joi.string().default('transaction.events'),
+        RABBITMQ_VERSION: Joi.string().optional(),
       }),
     }),
     DatabaseModule,

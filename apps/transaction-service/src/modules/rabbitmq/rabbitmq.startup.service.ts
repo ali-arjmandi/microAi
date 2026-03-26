@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { RabbitMqConnectionService } from './rabbitmq.connection.service';
+import { buildVersionedName } from './rabbitmq.config';
 
 @Injectable()
 export class RabbitMqStartupService implements OnApplicationBootstrap {
@@ -12,9 +13,10 @@ export class RabbitMqStartupService implements OnApplicationBootstrap {
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
-    const exchange =
-      this.configService.get<string>('OUTBOX_EXCHANGE') ??
-      'transactions.events.v1';
+    const exchangeBase =
+      this.configService.get<string>('OUTBOX_EXCHANGE') ?? 'transaction.events';
+    const version = this.configService.get<string>('RABBITMQ_VERSION');
+    const exchange = buildVersionedName(exchangeBase, version);
 
     try {
       await this.connectionService.connect();
