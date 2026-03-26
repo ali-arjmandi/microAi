@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { DatabaseModule } from './database/prisma.module';
+import { DatabaseModule } from './modules/database/prisma.module';
 import { HealthController } from './health/health.controller';
 import { OutboxModule } from './modules/outbox/outbox.module';
 import { TransactionsGrpcController } from './modules/transactions/transactions.grpc.controller';

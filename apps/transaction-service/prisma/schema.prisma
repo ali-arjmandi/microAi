@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TransactionState {
+  INITIATED
+}
+
+enum OutboxStatus {
+  PENDING
+  PUBLISHED
+  FAILED
+}
+
+model Transaction {
+  id              String           @id @default(uuid())
+  title           String
+  propertyAddress String
+  price           Decimal          @db.Decimal(12, 2)
+  buyerId         String
+  sellerId        String
+  state           TransactionState @default(INITIATED)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([state])
+  @@index([createdAt])
+  @@map("transactions")
+}
+
+model OutboxEvent {
+  id            String       @id @default(uuid())
+  aggregateType String
+  aggregateId   String
+  eventType     String
+  payload       Json
+  status        OutboxStatus @default(PENDING)
+  retryCount    Int          @default(0)
+  availableAt   DateTime     @default(now())
+  createdAt     DateTime     @default(now())
+  publishedAt   DateTime?
+
+  @@index([status, availableAt, createdAt])
+  @@index([aggregateType, aggregateId])
+  @@map("outbox_events")
+}
