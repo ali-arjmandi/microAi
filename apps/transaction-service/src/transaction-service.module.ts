@@ -8,6 +8,7 @@ import { OutboxModule } from './modules/outbox/outbox.module';
 import { RabbitMqModule } from './modules/rabbitmq/rabbitmq.module';
 import { TransactionsGrpcController } from './modules/transactions/transactions.grpc.controller';
 import { TransactionsModule } from './modules/transactions/transactions.module';
+import { TransactionServiceStartupOrchestrator } from './transaction-service.startup.orchestrator';
 
 @Module({
   imports: [
@@ -37,6 +38,6 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
     RabbitMqModule,
   ],
   controllers: [TransactionsGrpcController, HealthController],
-  providers: [],
+  providers: [TransactionServiceStartupOrchestrator],
 })
 export class TransactionServiceModule {}

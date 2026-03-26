@@ -29,7 +29,9 @@ export const normalizeRoutingKey = (
   const lastPart = parts[parts.length - 1];
   const hasVersionSuffix =
     (Boolean(version) && lastPart === version) || /^v\d+$/u.test(lastPart);
-  const baseEventType = hasVersionSuffix ? parts.slice(0, -1).join('.') : normalizedEventType;
+  const baseEventType = hasVersionSuffix
+    ? parts.slice(0, -1).join('.')
+    : normalizedEventType;
 
   if (!baseEventType) {
     return normalizedEventType;

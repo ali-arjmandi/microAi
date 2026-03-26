@@ -4,6 +4,6 @@ import { RabbitMqStartupService } from './rabbitmq.startup.service';
 
 @Module({
   providers: [RabbitMqConnectionService, RabbitMqStartupService],
-  exports: [RabbitMqConnectionService],
+  exports: [RabbitMqConnectionService, RabbitMqStartupService],
 })
 export class RabbitMqModule {}

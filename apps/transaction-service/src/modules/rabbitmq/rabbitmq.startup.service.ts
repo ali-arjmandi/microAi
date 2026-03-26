@@ -1,10 +1,10 @@
-import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { RabbitMqConnectionService } from './rabbitmq.connection.service';
 import { buildVersionedName } from './rabbitmq.config';
 
 @Injectable()
-export class RabbitMqStartupService implements OnApplicationBootstrap {
+export class RabbitMqStartupService {
   private readonly logger = new Logger(RabbitMqStartupService.name);
 
   constructor(
@@ -12,7 +12,7 @@ export class RabbitMqStartupService implements OnApplicationBootstrap {
     private readonly configService: ConfigService,
   ) {}
 
-  async onApplicationBootstrap(): Promise<void> {
+  async initialize(): Promise<void> {
     const exchangeBase =
       this.configService.get<string>('OUTBOX_EXCHANGE') ?? 'transaction.events';
     const version = this.configService.get<string>('RABBITMQ_VERSION');

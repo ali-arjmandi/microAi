@@ -1,17 +1,10 @@
-import {
-  Injectable,
-  Logger,
-  OnApplicationBootstrap,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OutboxPublisher } from './outbox.publisher';
 import { OutboxRepository } from './outbox.repository';
 
 @Injectable()
-export class OutboxProcessor
-  implements OnApplicationBootstrap, OnModuleDestroy
-{
+export class OutboxProcessor implements OnModuleDestroy {
   private readonly logger = new Logger(OutboxProcessor.name);
   private readonly pollIntervalMs: number;
   private readonly batchSize: number;
@@ -30,7 +23,11 @@ export class OutboxProcessor
     this.batchSize = this.getNumericConfig('OUTBOX_BATCH_SIZE', 100);
   }
 
-  onApplicationBootstrap(): void {
+  startProcessing(): void {
+    if (this.intervalRef) {
+      return;
+    }
+
     this.logger.log(
       `Starting outbox processor (interval=${this.pollIntervalMs}ms, batchSize=${this.batchSize})`,
     );
