@@ -9,6 +9,31 @@ datasource db {
 
 enum TransactionState {
   INITIATED
+  AI_PROCESSING
+  REJECTED_MODERATION
+  READY
+  FAILED
+}
+
+enum AiProcessingStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum SearchIndexStatus {
+  PENDING
+  INDEXED_BASE
+  INDEXED_ENRICHED
+  FAILED
+}
+
+enum ModerationStatus {
+  PENDING
+  ALLOW
+  REVIEW
+  REJECT
 }
 
 enum OutboxStatus {
@@ -18,17 +43,37 @@ enum OutboxStatus {
 }
 
 model Transaction {
-  id              String           @id @default(uuid())
+  id              String  @id @default(uuid())
   title           String
   propertyAddress String
-  price           Decimal          @db.Decimal(12, 2)
+  description     String?
+  price           Decimal @db.Decimal(12, 2)
   buyerId         String
   sellerId        String
-  state           TransactionState @default(INITIATED)
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
 
-  @@index([state])
+  state            TransactionState   @default(INITIATED)
+  aiStatus         AiProcessingStatus @default(PENDING)
+  searchStatus     SearchIndexStatus  @default(PENDING)
+  moderationStatus ModerationStatus   @default(PENDING)
+
+  summary              String?
+  improvedDescription  String?
+  riskScore            Decimal? @db.Decimal(5, 2)
+  riskNarrative        String?
+  moderationReason     String?
+  moderationConfidence Decimal? @db.Decimal(5, 2)
+  searchTags           Json?
+  aiModelVersion       String?
+  aiPromptVersion      String?
+
+  version   Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([state, createdAt])
+  @@index([aiStatus, createdAt])
+  @@index([searchStatus, createdAt])
+  @@index([moderationStatus, createdAt])
   @@index([createdAt])
   @@map("transactions")
 }
