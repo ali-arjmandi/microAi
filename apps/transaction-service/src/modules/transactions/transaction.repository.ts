@@ -24,20 +24,24 @@ export class TransactionRepository {
     });
   }
 
-  findById(transactionId: string) {
-    return this.prisma.transaction.findUnique({
+  findById(transactionId: string, tx?: TransactionClient) {
+    const client = tx ?? this.prisma;
+
+    return client.transaction.findUnique({
       where: { id: transactionId },
     });
   }
 
-  search(query?: string) {
+  search(query?: string, tx?: TransactionClient) {
+    const client = tx ?? this.prisma;
+
     if (!query) {
-      return this.prisma.transaction.findMany({
+      return client.transaction.findMany({
         orderBy: { createdAt: 'desc' },
       });
     }
 
-    return this.prisma.transaction.findMany({
+    return client.transaction.findMany({
       where: {
         OR: [
           { title: { contains: query, mode: 'insensitive' } },
@@ -48,8 +52,14 @@ export class TransactionRepository {
     });
   }
 
-  updateState(transactionId: string, state: TransactionState) {
-    return this.prisma.transaction.update({
+  updateState(
+    transactionId: string,
+    state: TransactionState,
+    tx?: TransactionClient,
+  ) {
+    const client = tx ?? this.prisma;
+
+    return client.transaction.update({
       where: { id: transactionId },
       data: { state },
     });

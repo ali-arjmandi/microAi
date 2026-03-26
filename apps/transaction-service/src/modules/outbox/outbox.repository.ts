@@ -3,6 +3,7 @@ import { EventEnvelope, TransactionCreatedEvent } from '@app/common';
 import { PrismaService } from '../database/prisma.service';
 import { OutboxStatus } from 'apps/transaction-service/prisma/generated/enums';
 import { Prisma } from 'apps/transaction-service/prisma/generated/client';
+import { TransactionClient } from 'apps/transaction-service/prisma/generated/internal/prismaNamespace';
 
 @Injectable()
 export class OutboxRepository {
@@ -11,7 +12,7 @@ export class OutboxRepository {
   enqueueTransactionCreated(
     aggregateId: string,
     payload: EventEnvelope<TransactionCreatedEvent>,
-    tx?: any,
+    tx?: TransactionClient,
   ) {
     const client = tx ?? this.prisma;
     return client.outboxEvent.create({
@@ -25,16 +26,19 @@ export class OutboxRepository {
     });
   }
 
-  listPending(limit = 100) {
-    return this.prisma.outboxEvent.findMany({
+  listPending(limit = 100, tx?: TransactionClient) {
+    const client = tx ?? this.prisma;
+
+    return client.outboxEvent.findMany({
       where: { status: OutboxStatus.PENDING },
       orderBy: { createdAt: 'asc' },
       take: limit,
     });
   }
 
-  markPublished(eventId: string) {
-    return this.prisma.outboxEvent.update({
+  markPublished(eventId: string, tx?: TransactionClient) {
+    const client = tx ?? this.prisma;
+    return client.outboxEvent.update({
       where: { id: eventId },
       data: {
         status: OutboxStatus.PUBLISHED,
@@ -43,8 +47,9 @@ export class OutboxRepository {
     });
   }
 
-  markFailed(eventId: string) {
-    return this.prisma.outboxEvent.update({
+  markFailed(eventId: string, tx?: TransactionClient) {
+    const client = tx ?? this.prisma;
+    return client.outboxEvent.update({
       where: { id: eventId },
       data: {
         status: OutboxStatus.FAILED,
