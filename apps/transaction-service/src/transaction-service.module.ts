@@ -5,6 +5,7 @@ import { resolve } from 'path';
 import { DatabaseModule } from './modules/database/prisma.module';
 import { HealthController } from './health/health.controller';
 import { OutboxModule } from './modules/outbox/outbox.module';
+import { RabbitMqModule } from './modules/rabbitmq/rabbitmq.module';
 import { TransactionsGrpcController } from './modules/transactions/transactions.grpc.controller';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 
@@ -22,12 +23,13 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
         RABBITMQ_URL: Joi.string()
           .uri({ scheme: ['amqp', 'amqps'] })
           .required(),
-        OUTBOX_EXCHANGE: Joi.string().default('transaction.events'),
+        OUTBOX_EXCHANGE: Joi.string().default('transactions.events.v1'),
       }),
     }),
     DatabaseModule,
     TransactionsModule,
     OutboxModule,
+    RabbitMqModule,
   ],
   controllers: [TransactionsGrpcController, HealthController],
   providers: [],

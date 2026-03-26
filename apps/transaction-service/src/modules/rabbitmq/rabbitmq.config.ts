@@ -5,5 +5,5 @@ export interface RabbitMqConfig {
 
 export const rabbitMqConfig = (): RabbitMqConfig => ({
   url: process.env.RABBITMQ_URL ?? '',
-  outboxExchange: process.env.OUTBOX_EXCHANGE ?? 'transaction.events',
+  outboxExchange: process.env.OUTBOX_EXCHANGE ?? 'transactions.events.v1',
 });
