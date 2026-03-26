@@ -6,3 +6,4 @@ export * from './events/transaction-created.event';
 export * from './events/transaction-updated.event';
 export * from './events/transaction-deleted.event';
 export * from './search/searchable-transaction.type';
+export * from './rabbitmq/rabbitmq-structure.config';

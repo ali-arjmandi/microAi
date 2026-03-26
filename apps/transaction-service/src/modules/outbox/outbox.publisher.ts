@@ -4,6 +4,7 @@ import { EventEnvelope } from '@app/common';
 import { RabbitMqConnectionService } from '../rabbitmq/rabbitmq.connection.service';
 import {
   buildVersionedName,
+  getTransactionOutboxExchange,
   normalizeRoutingKey,
 } from '../rabbitmq/rabbitmq.config';
 
@@ -18,8 +19,7 @@ export class OutboxPublisher {
     const version = this.configService.get<string>('RABBITMQ_VERSION');
     const routingKey = this.mapRoutingKey(event.eventType, version);
     const envelope = this.getEnvelope(event.payload);
-    const exchangeBase =
-      this.configService.get<string>('OUTBOX_EXCHANGE') ?? 'transaction.events';
+    const exchangeBase = getTransactionOutboxExchange();
     const exchange = buildVersionedName(exchangeBase, version);
     const channel = this.connectionService.getChannel();
     const content = Buffer.from(JSON.stringify(envelope));

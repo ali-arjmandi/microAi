@@ -1,14 +1,17 @@
+import { rabbitmqStructureConfig } from '@app/common';
+
 export interface RabbitMqConfig {
   readonly url: string;
-  readonly outboxExchange: string;
   readonly version?: string;
 }
 
 export const rabbitMqConfig = (): RabbitMqConfig => ({
   url: process.env.RABBITMQ_URL ?? '',
-  outboxExchange: process.env.OUTBOX_EXCHANGE ?? 'transaction.events',
   version: process.env.RABBITMQ_VERSION,
 });
+
+export const getTransactionOutboxExchange = (): string =>
+  rabbitmqStructureConfig.apps.transactionService.exchange;
 
 export const buildVersionedName = (base: string, version?: string): string => {
   const normalizedBase = base.trim();

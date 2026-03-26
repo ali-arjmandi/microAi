@@ -24,7 +24,6 @@ import { TransactionServiceStartupOrchestrator } from './transaction-service.sta
         RABBITMQ_URL: Joi.string()
           .uri({ scheme: ['amqp', 'amqps'] })
           .required(),
-        OUTBOX_EXCHANGE: Joi.string().default('transaction.events'),
         RABBITMQ_VERSION: Joi.string().optional(),
         OUTBOX_POLL_INTERVAL_MS: Joi.number().default(2000),
         OUTBOX_BATCH_SIZE: Joi.number().default(100),
