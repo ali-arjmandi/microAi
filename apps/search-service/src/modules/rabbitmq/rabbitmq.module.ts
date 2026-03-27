@@ -1,20 +1,18 @@
 import { Module } from '@nestjs/common';
 import { RabbitMqConnectionService } from './rabbitmq.connection.service';
 import { RabbitMqStartupService } from './rabbitmq.startup.service';
-import { SearchEventPublisher } from './search-event.publisher';
 import { ElasticsearchModule } from '../elasticsearch/elasticsearch.module';
+import { ElasticsearchEventPublisher } from './publishers/elasticsearch-event.publisher';
+import { ElasticsearchConsumer } from './consumers/elasticsearch.consumer';
 
 @Module({
   imports: [ElasticsearchModule],
   providers: [
     RabbitMqConnectionService,
     RabbitMqStartupService,
-    SearchEventPublisher,
+    ElasticsearchConsumer,
+    ElasticsearchEventPublisher,
   ],
-  exports: [
-    RabbitMqConnectionService,
-    RabbitMqStartupService,
-    SearchEventPublisher,
-  ],
+  exports: [RabbitMqConnectionService, RabbitMqStartupService],
 })
 export class RabbitMqModule {}

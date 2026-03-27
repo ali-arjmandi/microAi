@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { RabbitMqConnectionService } from './rabbitmq.connection.service';
 import { ConsumeMessage } from 'amqplib';
-import { ElasticsearchConsumer } from '../elasticsearch/elasticsearch.consumer';
+import { ElasticsearchConsumer } from './consumers/elasticsearch.consumer';
 import {
   buildVersionedName,
   getSearchEventsExchange,

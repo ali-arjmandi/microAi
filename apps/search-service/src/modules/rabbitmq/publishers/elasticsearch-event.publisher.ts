@@ -1,16 +1,16 @@
 import { EventEnvelope } from '@app/common';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { RabbitMqConnectionService } from './rabbitmq.connection.service';
+import { RabbitMqConnectionService } from '../rabbitmq.connection.service';
 import {
   buildVersionedName,
   getSearchEventsExchange,
   normalizeRoutingKey,
-} from './rabbitmq.config';
+} from '../rabbitmq.config';
 
 @Injectable()
-export class SearchEventPublisher {
-  private readonly logger = new Logger(SearchEventPublisher.name);
+export class ElasticsearchEventPublisher {
+  private readonly logger = new Logger(ElasticsearchEventPublisher.name);
 
   constructor(
     private readonly connectionService: RabbitMqConnectionService,

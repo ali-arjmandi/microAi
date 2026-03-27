@@ -1,9 +1,9 @@
 import { EventEnvelope } from '@app/common';
 import { Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { IndexingService } from './elasticsearch.indexing.service';
-import { SearchEventPublisher } from '../rabbitmq/search-event.publisher';
-import { SearchDocument } from './search-document.model';
+import { IndexingService } from '../../elasticsearch/elasticsearch.indexing.service';
+import { ElasticsearchEventPublisher } from '../publishers/elasticsearch-event.publisher';
+import { SearchDocument } from '../../elasticsearch/search-document.model';
 
 interface TransactionUpsertPayload {
   transactionId?: string;
@@ -56,7 +56,7 @@ export class ElasticsearchConsumer {
 
   constructor(
     private readonly indexingService: IndexingService,
-    private readonly searchEventPublisher: SearchEventPublisher,
+    private readonly searchEventPublisher: ElasticsearchEventPublisher,
   ) {}
 
   async handleMessage(payload: unknown): Promise<void> {
