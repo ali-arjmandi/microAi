@@ -3,4 +3,5 @@ export interface AiRejectedEventV1 {
   reason: string;
   model: string;
   promptVersion: string;
+  detail?: string;
 }

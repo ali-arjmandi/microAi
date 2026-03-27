@@ -8,8 +8,9 @@ import {
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
-import { ListingEnrichmentInput } from '../../ai/ai.types';
 import { AiClientService } from '../../ai/ai-client.service';
+import { AiModelOutputInvalidError } from '../../ai/ai-model-output.error';
+import { ListingEnrichmentInput } from '../../ai/ai.types';
 import { AiEventPublisher } from '../publishers/ai-event.publisher';
 
 type TransactionPayload = TransactionCreatedEvent | TransactionUpdatedEvent;
@@ -98,6 +99,26 @@ export class AiConsumer {
 
       await this.aiEventPublisher.publishEnriched(enrichedEnvelope);
     } catch (error) {
+      if (error instanceof AiModelOutputInvalidError) {
+        this.logger.warn(
+          `AI model output invalid eventId="${envelope.eventId}" code="${error.code}"${error.detail ? ` detail="${error.detail}"` : ''}`,
+        );
+        const rejectedEnvelope: EventEnvelope<AiRejectedEventV1> = {
+          eventId: randomUUID(),
+          eventType: 'ai.rejected',
+          occurredAt: new Date().toISOString(),
+          payload: {
+            transactionId: transaction.transactionId,
+            reason: error.code,
+            model,
+            promptVersion,
+            detail: error.detail,
+          },
+        };
+        await this.aiEventPublisher.publishRejected(rejectedEnvelope);
+        return;
+      }
+
       this.logger.error(
         `AI processing failed for eventId="${envelope.eventId}": ${String(
           error,

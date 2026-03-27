@@ -4,6 +4,8 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { parseValidAiEnrichmentOutput } from './ai-enrichment-output.schema';
+import { AiModelOutputInvalidError } from './ai-model-output.error';
 import { AiEnrichmentResult, ListingEnrichmentInput } from './ai.types';
 
 interface OpenRouterChoice {
@@ -46,7 +48,7 @@ export class AiClientService {
 
     const raw = await this.createChatCompletion(systemPrompt, userPrompt);
     const parsed = this.parseResponse(raw);
-    return this.validateEnrichment(parsed);
+    return parseValidAiEnrichmentOutput(parsed);
   }
 
   private async createChatCompletion(
@@ -136,61 +138,23 @@ export class AiClientService {
     try {
       return JSON.parse(trimmed);
     } catch {
-      const firstBrace = trimmed.indexOf('{');
-      const lastBrace = trimmed.lastIndexOf('}');
-      if (firstBrace >= 0 && lastBrace > firstBrace) {
-        const candidate = trimmed.slice(firstBrace, lastBrace + 1);
-        return JSON.parse(candidate);
+      try {
+        const firstBrace = trimmed.indexOf('{');
+        const lastBrace = trimmed.lastIndexOf('}');
+        if (firstBrace >= 0 && lastBrace > firstBrace) {
+          const candidate = trimmed.slice(firstBrace, lastBrace + 1);
+          return JSON.parse(candidate);
+        }
+      } catch {
+        throw new AiModelOutputInvalidError(
+          'json_parse_failed',
+          'Model output is not valid JSON',
+        );
       }
-      throw new Error('Model output is not valid JSON');
+      throw new AiModelOutputInvalidError(
+        'json_parse_failed',
+        'Model output is not valid JSON',
+      );
     }
-  }
-
-  private validateEnrichment(payload: unknown): AiEnrichmentResult {
-    if (!payload || typeof payload !== 'object') {
-      throw new Error('AI enrichment payload must be an object');
-    }
-
-    const value = payload as Partial<AiEnrichmentResult>;
-    const moderation = value.moderation as Partial<
-      AiEnrichmentResult['moderation']
-    >;
-
-    if (
-      typeof value.summary !== 'string' ||
-      typeof value.riskNarrative !== 'string' ||
-      typeof value.improvedDescription !== 'string'
-    ) {
-      throw new Error('AI enrichment payload contains invalid text fields');
-    }
-
-    if (!Array.isArray(value.searchTags)) {
-      throw new Error('AI enrichment payload searchTags must be an array');
-    }
-
-    if (
-      !moderation ||
-      typeof moderation.status !== 'string' ||
-      !['ALLOW', 'REJECT', 'REVIEW'].includes(moderation.status) ||
-      typeof moderation.reason !== 'string' ||
-      typeof moderation.confidence !== 'number'
-    ) {
-      throw new Error('AI enrichment payload moderation is invalid');
-    }
-
-    return {
-      summary: value.summary,
-      riskNarrative: value.riskNarrative,
-      searchTags: value.searchTags.filter(
-        (tag: unknown): tag is string =>
-          typeof tag === 'string' && tag.length > 0,
-      ),
-      improvedDescription: value.improvedDescription,
-      moderation: {
-        status: moderation.status,
-        reason: moderation.reason,
-        confidence: Math.max(0, Math.min(1, moderation.confidence)),
-      },
-    };
   }
 }

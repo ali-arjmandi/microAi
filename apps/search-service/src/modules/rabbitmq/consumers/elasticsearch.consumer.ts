@@ -31,6 +31,7 @@ interface AiEnrichedPayload {
 interface AiRejectedPayload {
   transactionId?: string;
   reason?: string;
+  detail?: string;
 }
 
 interface SearchStatusUpdatedPayload {
@@ -275,10 +276,12 @@ export class ElasticsearchConsumer {
     const hasBaseTransactionData =
       this.hasBaseTransactionData(existingDocument);
 
+    const moderationReason = this.formatAiRejectionReason(payload);
+
     await this.indexingService.upsertDocument({
       transactionId: payload.transactionId,
       moderationStatus: 'REJECT',
-      moderationReason: payload.reason,
+      moderationReason,
       aiStatus: 'FAILED',
       searchStatus: hasBaseTransactionData ? 'FAILED' : 'PENDING_BASE',
       eventType: envelope.eventType,
@@ -289,8 +292,17 @@ export class ElasticsearchConsumer {
     await this.publishStatusRejected(
       envelope,
       payload.transactionId,
-      payload.reason,
+      moderationReason,
     );
+  }
+
+  private formatAiRejectionReason(payload: AiRejectedPayload): string {
+    const base = payload.reason?.trim() ?? '';
+    const detail = payload.detail?.trim();
+    if (base && detail) {
+      return `${base}: ${detail}`;
+    }
+    return base || detail || 'unknown';
   }
 
   private getRecordPayload(payload: unknown): Record<string, unknown> {
