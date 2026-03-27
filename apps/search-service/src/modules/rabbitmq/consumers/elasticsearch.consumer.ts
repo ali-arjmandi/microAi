@@ -80,26 +80,46 @@ export class ElasticsearchConsumer {
       return;
     }
 
+    this.logger.log(
+      JSON.stringify({
+        msg: 'Processing search event',
+        eventId: envelope.eventId,
+        eventType: envelope.eventType,
+      }),
+    );
+
     const normalizedEventType = this.normalizeEventType(envelope.eventType);
 
+    let handled = true;
     switch (normalizedEventType) {
       case 'transaction.created':
       case 'transaction.updated':
         await this.handleTransactionUpsert(envelope);
-        return;
+        break;
       case 'transaction.deleted':
         await this.handleTransactionDelete(envelope);
-        return;
+        break;
       case 'ai.enriched':
         await this.handleAiEnriched(envelope);
-        return;
+        break;
       case 'ai.rejected':
         await this.handleAiRejected(envelope);
-        return;
+        break;
       default:
+        handled = false;
         this.logger.warn(
           `Ignoring unsupported eventType="${envelope.eventType}" eventId="${envelope.eventId}"`,
         );
+    }
+
+    if (handled) {
+      this.logger.log(
+        JSON.stringify({
+          msg: 'Processed search event',
+          eventId: envelope.eventId,
+          eventType: envelope.eventType,
+        }),
+      );
     }
   }
 
@@ -318,6 +338,14 @@ export class ElasticsearchConsumer {
       occurredAt: new Date().toISOString(),
       payload,
     });
+    this.logger.log(
+      JSON.stringify({
+        msg: 'Published search status updated',
+        transactionId,
+        sourceEventId: sourceEnvelope.eventId,
+        sourceEventType: sourceEnvelope.eventType,
+      }),
+    );
   }
 
   private async publishStatusRejected(
@@ -339,5 +367,14 @@ export class ElasticsearchConsumer {
       occurredAt: new Date().toISOString(),
       payload,
     });
+    this.logger.log(
+      JSON.stringify({
+        msg: 'Published search status rejected',
+        transactionId,
+        reason,
+        sourceEventId: sourceEnvelope.eventId,
+        sourceEventType: sourceEnvelope.eventType,
+      }),
+    );
   }
 }

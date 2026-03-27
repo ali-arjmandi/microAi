@@ -27,7 +27,14 @@ export class IndexingService {
       retry_on_conflict: 3,
     });
 
-    this.logger.debug(`Upserted search document transactionId="${id}"`);
+    this.logger.debug(
+      JSON.stringify({
+        msg: 'Upserted search document',
+        transactionId: id,
+        eventId: patch.eventId,
+        eventType: patch.eventType,
+      }),
+    );
   }
 
   async getDocument(transactionId: string): Promise<SearchDocument | null> {
@@ -63,7 +70,12 @@ export class IndexingService {
         index: indexName,
         id,
       });
-      this.logger.debug(`Deleted search document transactionId="${id}"`);
+      this.logger.debug(
+        JSON.stringify({
+          msg: 'Deleted search document',
+          transactionId: id,
+        }),
+      );
     } catch (error) {
       if (this.isNotFound(error)) {
         this.logger.debug(

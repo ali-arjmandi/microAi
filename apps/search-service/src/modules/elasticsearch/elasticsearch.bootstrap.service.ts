@@ -35,7 +35,12 @@ export class ElasticsearchBootstrapService {
           properties: SEARCH_INDEX_MAPPINGS,
         },
       });
-      this.logger.log(`Created Elasticsearch index "${indexName}"`);
+      this.logger.log(
+        JSON.stringify({
+          msg: 'Created Elasticsearch index',
+          indexName,
+        }),
+      );
       return;
     }
 
@@ -44,6 +49,11 @@ export class ElasticsearchBootstrapService {
       dynamic: false,
       properties: SEARCH_INDEX_MAPPINGS,
     });
-    this.logger.log(`Verified Elasticsearch mappings for "${indexName}"`);
+    this.logger.log(
+      JSON.stringify({
+        msg: 'Verified Elasticsearch mappings',
+        indexName,
+      }),
+    );
   }
 }

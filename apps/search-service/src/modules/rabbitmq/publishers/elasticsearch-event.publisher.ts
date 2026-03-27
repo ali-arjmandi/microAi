@@ -58,6 +58,16 @@ export class ElasticsearchEventPublisher {
         },
       );
     });
+
+    this.logger.log(
+      JSON.stringify({
+        msg: 'Published search event',
+        exchange,
+        routingKey,
+        eventId: envelope.eventId,
+        eventType: envelope.eventType,
+      }),
+    );
   }
 
   private getEnvelope(payload: unknown): EventEnvelope<unknown> {

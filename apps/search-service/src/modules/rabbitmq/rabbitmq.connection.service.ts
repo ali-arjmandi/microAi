@@ -22,7 +22,11 @@ export class RabbitMqConnectionService implements OnModuleDestroy {
 
     this.connection = await amqpConnect(url);
     this.channel = await this.connection.createConfirmChannel();
-    this.logger.log('RabbitMQ connection and confirm channel established');
+    this.logger.log(
+      JSON.stringify({
+        msg: 'RabbitMQ connection established',
+      }),
+    );
   }
 
   getChannel(): ConfirmChannel {
@@ -36,6 +40,10 @@ export class RabbitMqConnectionService implements OnModuleDestroy {
   async onModuleDestroy(): Promise<void> {
     await this.channel?.close();
     await this.connection?.close();
-    this.logger.log('RabbitMQ connection closed');
+    this.logger.log(
+      JSON.stringify({
+        msg: 'RabbitMQ connection closed',
+      }),
+    );
   }
 }

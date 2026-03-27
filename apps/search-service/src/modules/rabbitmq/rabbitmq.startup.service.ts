@@ -84,6 +84,18 @@ export class RabbitMqStartupService {
             try {
               const decodedContent = message.content.toString('utf-8');
               const payload = JSON.parse(decodedContent) as unknown;
+              const meta =
+                payload && typeof payload === 'object'
+                  ? (payload as { eventId?: string; eventType?: string })
+                  : undefined;
+              this.logger.debug(
+                JSON.stringify({
+                  msg: 'Consumed RabbitMQ message',
+                  queue: queueName,
+                  eventId: meta?.eventId,
+                  eventType: meta?.eventType,
+                }),
+              );
               await Promise.resolve(
                 this.elasticsearchConsumer.handleMessage(payload),
               );

@@ -8,6 +8,7 @@ import { HealthController } from './health/health.controller';
 import { RabbitMqModule } from './modules/rabbitmq/rabbitmq.module';
 import { SearchServiceStartupOrchestrator } from './search-service.startup.orchestrator';
 import { ElasticsearchModule } from './modules/elasticsearch/elasticsearch.module';
+import { ReadinessService } from './health/readiness.service';
 
 @Module({
   imports: [
@@ -30,6 +31,10 @@ import { ElasticsearchModule } from './modules/elasticsearch/elasticsearch.modul
     ElasticsearchModule,
   ],
   controllers: [SearchServiceController, HealthController],
-  providers: [SearchServiceService, SearchServiceStartupOrchestrator],
+  providers: [
+    SearchServiceService,
+    SearchServiceStartupOrchestrator,
+    ReadinessService,
+  ],
 })
 export class SearchServiceModule {}
