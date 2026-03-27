@@ -6,10 +6,9 @@ import { SearchServiceController } from './search-service.controller';
 import { SearchServiceService } from './search-service.service';
 import { HealthController } from './health/health.controller';
 import { TransactionEventsConsumer } from './modules/rabbitmq/consumers/transaction-events.consumer';
-import { IndexingService } from './indexing/indexing.service';
-import { mapTransactionEventToSearchDocument } from './indexing/document.mapper';
 import { RabbitMqModule } from './modules/rabbitmq/rabbitmq.module';
 import { SearchServiceStartupOrchestrator } from './search-service.startup.orchestrator';
+import { ElasticsearchModule } from './modules/elasticsearch/elasticsearch.module';
 
 @Module({
   imports: [
@@ -29,16 +28,12 @@ import { SearchServiceStartupOrchestrator } from './search-service.startup.orche
       }),
     }),
     RabbitMqModule,
+    ElasticsearchModule,
   ],
   controllers: [SearchServiceController, HealthController],
   providers: [
     SearchServiceService,
     TransactionEventsConsumer,
-    IndexingService,
-    {
-      provide: 'SEARCH_DOCUMENT_MAPPER',
-      useValue: mapTransactionEventToSearchDocument,
-    },
     SearchServiceStartupOrchestrator,
   ],
 })

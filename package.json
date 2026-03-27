@@ -44,6 +44,7 @@
     "infra:ps": "docker compose -f infra/docker/docker-compose.yml ps"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "^9.3.4",
     "@grpc/grpc-js": "^1.14.3",
     "@grpc/proto-loader": "^0.8.0",
     "@nestjs/common": "^9.0.0",
