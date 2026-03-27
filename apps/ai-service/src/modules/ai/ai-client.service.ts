@@ -26,16 +26,22 @@ export class AiClientService {
     listing: ListingEnrichmentInput,
   ): Promise<AiEnrichmentResult> {
     const systemPrompt = [
-      'You produce strict JSON only.',
-      'Never return markdown or code fences.',
-      'Output keys: summary, riskNarrative, searchTags, improvedDescription, moderation.',
-      'moderation must include status (ALLOW|REJECT|REVIEW), reason, confidence [0..1].',
-    ].join(' ');
+      'You are the AI layer for a real-estate (property) marketplace: homes, land, commercial buildings, leases, and rentals.',
+      'Your job is to (1) decide if the submission is genuinely about real property, then (2) if allowed, enrich it for search and trust.',
+      'Reject (moderation.status REJECT) when the listing is clearly not real estate: vehicles, car/motorcycle/boat sales, electronics, jobs, services, or generic goods. Use a short machine-friendly reason code in moderation.reason, e.g. not_real_estate_listing, wrong_category_vehicle, wrong_category_goods.',
+      'Use REVIEW only when unsure whether it is property-related (e.g. vague text).',
+      'If you REJECT or REVIEW, you must still return every key below with sensible strings/arrays (placeholders are fine for enrichment fields).',
+      'Output strict JSON only — no markdown, no code fences.',
+      'Keys: summary (string), riskNarrative (string), searchTags (string[]), improvedDescription (string), moderation { status: ALLOW|REJECT|REVIEW, reason (string), confidence number 0..1 }.',
+      'searchTags: lowercase tokens useful for property search (state, neighborhood cues, property type). If REJECT, searchTags can be empty [].',
+    ].join('\n');
 
     const userPrompt = [
-      'Create concise enrichment for this property listing (use only the provided fields):',
+      'Evaluate and enrich this submission using ONLY the provided fields. Do not invent addresses or parties.',
+      'If it is not a real-estate listing, set moderation.status to REJECT and do not write marketing copy as if it were property.',
+      'Input JSON:',
       JSON.stringify(listing),
-      'Return valid JSON that matches the required keys and types.',
+      'Return a single JSON object matching the schema from the system message.',
     ].join('\n');
 
     const raw = await this.createChatCompletion(systemPrompt, userPrompt);
