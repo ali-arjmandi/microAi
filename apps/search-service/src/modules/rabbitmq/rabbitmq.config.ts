@@ -14,7 +14,7 @@ type ExchangeDefinition = {
   name: string;
   type: string;
   durable: boolean;
-  bind: Record<string, string>;
+  bind: Record<string, readonly string[]>;
 };
 
 export interface QueueBindingTarget {
@@ -43,7 +43,7 @@ export const getSearchQueueBindingTargets = (): QueueBindingTarget[] => {
   const bindings: QueueBindingTarget[] = [];
   for (const exchange of exchanges) {
     for (const [routingKey, bindQueue] of Object.entries(exchange.bind)) {
-      if (bindQueue === queueName) {
+      if (bindQueue.includes(queueName)) {
         bindings.push({
           exchangeName: exchange.name,
           exchangeType: exchange.type,

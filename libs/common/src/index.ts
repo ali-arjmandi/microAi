@@ -5,5 +5,7 @@ export * from './events/event-envelope.type';
 export * from './events/transaction-created.event';
 export * from './events/transaction-updated.event';
 export * from './events/transaction-deleted.event';
+export * from './events/ai-enriched.event';
+export * from './events/ai-rejected.event';
 export * from './search/searchable-transaction.type';
 export * from './rabbitmq/rabbitmq-structure.config';
