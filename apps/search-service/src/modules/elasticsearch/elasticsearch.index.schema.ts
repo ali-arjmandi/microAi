@@ -58,6 +58,8 @@ export const SEARCH_INDEX_MAPPINGS: Record<string, estypes.MappingProperty> = {
   },
   price: { type: 'scaled_float' as const, scaling_factor: 100 },
   occurredAt: { type: 'date' as const },
+  lastBaseEventOccurredAt: { type: 'date' as const },
+  lastAiEventOccurredAt: { type: 'date' as const },
   createdAt: { type: 'date' as const },
   updatedAt: { type: 'date' as const },
 };

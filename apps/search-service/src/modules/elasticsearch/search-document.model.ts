@@ -19,6 +19,8 @@ export interface SearchDocument {
   moderationReason?: string;
   price?: number;
   occurredAt?: string;
+  lastBaseEventOccurredAt?: string;
+  lastAiEventOccurredAt?: string;
   createdAt?: string;
   updatedAt?: string;
 }

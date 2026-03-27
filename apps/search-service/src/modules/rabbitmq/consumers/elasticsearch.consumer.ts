@@ -4,6 +4,7 @@ import { randomUUID } from 'crypto';
 import { IndexingService } from '../../elasticsearch/elasticsearch.indexing.service';
 import { ElasticsearchEventPublisher } from '../publishers/elasticsearch-event.publisher';
 import { SearchDocument } from '../../elasticsearch/search-document.model';
+import { isIncomingEventApplicable } from './search-event-merge.util';
 
 interface TransactionUpsertPayload {
   transactionId?: string;
@@ -180,7 +181,27 @@ export class ElasticsearchConsumer {
     const existingDocument = await this.indexingService.getDocument(
       transactionPayload.transactionId,
     );
+
+    if (
+      !isIncomingEventApplicable(
+        envelope.occurredAt,
+        existingDocument?.lastBaseEventOccurredAt,
+      )
+    ) {
+      this.logger.debug(
+        JSON.stringify({
+          msg: 'Skipping stale transaction upsert',
+          transactionId: transactionPayload.transactionId,
+          eventId: envelope.eventId,
+          incomingOccurredAt: envelope.occurredAt,
+          lastBaseEventOccurredAt: existingDocument?.lastBaseEventOccurredAt,
+        }),
+      );
+      return;
+    }
+
     const isModerationRejected = this.isModerationRejected(existingDocument);
+    const nextSearchStatus = isModerationRejected ? 'FAILED' : 'READY';
 
     await this.indexingService.upsertDocument({
       transactionId: transactionPayload.transactionId,
@@ -191,13 +212,22 @@ export class ElasticsearchConsumer {
       buyerId: transactionPayload.buyerId,
       sellerId: transactionPayload.sellerId,
       state: transactionPayload.state,
-      searchStatus: isModerationRejected ? 'FAILED' : 'READY',
+      searchStatus: nextSearchStatus,
+      lastBaseEventOccurredAt: envelope.occurredAt,
       eventType: envelope.eventType,
       eventId: envelope.eventId,
       occurredAt: envelope.occurredAt,
     });
 
-    await this.publishStatusUpdated(envelope, transactionPayload.transactionId);
+    if (isModerationRejected) {
+      await this.publishStatusRejected(
+        envelope,
+        transactionPayload.transactionId,
+        existingDocument?.moderationReason,
+      );
+    } else {
+      await this.publishStatusUpdated(envelope, transactionPayload.transactionId);
+    }
   }
 
   private async handleTransactionDelete(
@@ -232,6 +262,25 @@ export class ElasticsearchConsumer {
     const existingDocument = await this.indexingService.getDocument(
       payload.transactionId,
     );
+
+    if (
+      !isIncomingEventApplicable(
+        envelope.occurredAt,
+        existingDocument?.lastAiEventOccurredAt,
+      )
+    ) {
+      this.logger.debug(
+        JSON.stringify({
+          msg: 'Skipping stale AI enriched event',
+          transactionId: payload.transactionId,
+          eventId: envelope.eventId,
+          incomingOccurredAt: envelope.occurredAt,
+          lastAiEventOccurredAt: existingDocument?.lastAiEventOccurredAt,
+        }),
+      );
+      return;
+    }
+
     const hasBaseTransactionData =
       this.hasBaseTransactionData(existingDocument);
     const nextSearchStatus = hasBaseTransactionData ? 'READY' : 'PENDING_BASE';
@@ -247,6 +296,7 @@ export class ElasticsearchConsumer {
       aiStatus: 'COMPLETED',
       moderationStatus: 'ALLOW',
       searchStatus: nextSearchStatus,
+      lastAiEventOccurredAt: envelope.occurredAt,
       eventType: envelope.eventType,
       eventId: envelope.eventId,
       occurredAt: envelope.occurredAt,
@@ -273,6 +323,25 @@ export class ElasticsearchConsumer {
     const existingDocument = await this.indexingService.getDocument(
       payload.transactionId,
     );
+
+    if (
+      !isIncomingEventApplicable(
+        envelope.occurredAt,
+        existingDocument?.lastAiEventOccurredAt,
+      )
+    ) {
+      this.logger.debug(
+        JSON.stringify({
+          msg: 'Skipping stale AI rejected event',
+          transactionId: payload.transactionId,
+          eventId: envelope.eventId,
+          incomingOccurredAt: envelope.occurredAt,
+          lastAiEventOccurredAt: existingDocument?.lastAiEventOccurredAt,
+        }),
+      );
+      return;
+    }
+
     const hasBaseTransactionData =
       this.hasBaseTransactionData(existingDocument);
 
@@ -284,16 +353,19 @@ export class ElasticsearchConsumer {
       moderationReason,
       aiStatus: 'FAILED',
       searchStatus: hasBaseTransactionData ? 'FAILED' : 'PENDING_BASE',
+      lastAiEventOccurredAt: envelope.occurredAt,
       eventType: envelope.eventType,
       eventId: envelope.eventId,
       occurredAt: envelope.occurredAt,
     });
 
-    await this.publishStatusRejected(
-      envelope,
-      payload.transactionId,
-      moderationReason,
-    );
+    if (hasBaseTransactionData) {
+      await this.publishStatusRejected(
+        envelope,
+        payload.transactionId,
+        moderationReason,
+      );
+    }
   }
 
   private formatAiRejectionReason(payload: AiRejectedPayload): string {
