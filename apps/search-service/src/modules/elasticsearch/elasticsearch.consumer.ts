@@ -1,6 +1,8 @@
 import { EventEnvelope } from '@app/common';
 import { Injectable, Logger } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { IndexingService } from './elasticsearch.indexing.service';
+import { SearchEventPublisher } from '../rabbitmq/search-event.publisher';
 
 interface TransactionUpsertPayload {
   transactionId?: string;
@@ -29,6 +31,21 @@ interface AiRejectedPayload {
   reason?: string;
 }
 
+interface SearchStatusUpdatedPayload {
+  transactionId: string;
+  searchStatus: 'UPDATED';
+  sourceEventId: string;
+  sourceEventType: string;
+}
+
+interface SearchStatusRejectedPayload {
+  transactionId: string;
+  searchStatus: 'REJECTED';
+  reason?: string;
+  sourceEventId: string;
+  sourceEventType: string;
+}
+
 @Injectable()
 export class ElasticsearchConsumer {
   private readonly logger = new Logger(ElasticsearchConsumer.name);
@@ -36,9 +53,12 @@ export class ElasticsearchConsumer {
   private readonly processedEventQueue: string[] = [];
   private readonly maxTrackedEventIds = 10_000;
 
-  constructor(private readonly indexingService: IndexingService) {}
+  constructor(
+    private readonly indexingService: IndexingService,
+    private readonly searchEventPublisher: SearchEventPublisher,
+  ) {}
 
-  handleMessage(payload: unknown): void {
+  async handleMessage(payload: unknown): Promise<void> {
     let envelope: EventEnvelope<unknown>;
 
     try {
@@ -64,16 +84,16 @@ export class ElasticsearchConsumer {
     switch (normalizedEventType) {
       case 'transaction.created':
       case 'transaction.updated':
-        this.handleTransactionUpsert(envelope);
+        await this.handleTransactionUpsert(envelope);
         return;
       case 'transaction.deleted':
-        this.handleTransactionDelete(envelope);
+        await this.handleTransactionDelete(envelope);
         return;
       case 'ai.enriched':
-        this.handleAiEnriched(envelope);
+        await this.handleAiEnriched(envelope);
         return;
       case 'ai.rejected':
-        this.handleAiRejected(envelope);
+        await this.handleAiRejected(envelope);
         return;
       default:
         this.logger.warn(
@@ -122,7 +142,9 @@ export class ElasticsearchConsumer {
     return eventType.trim().replace(/\.v\d+$/u, '');
   }
 
-  private handleTransactionUpsert(envelope: EventEnvelope<unknown>): void {
+  private async handleTransactionUpsert(
+    envelope: EventEnvelope<unknown>,
+  ): Promise<void> {
     const payload = this.getRecordPayload(envelope.payload);
     if (typeof payload.transactionId !== 'string') {
       this.logger.warn(
@@ -132,7 +154,7 @@ export class ElasticsearchConsumer {
     }
 
     const transactionPayload = payload as unknown as TransactionUpsertPayload;
-    this.indexingService.upsertDocument({
+    await this.indexingService.upsertDocument({
       transactionId: transactionPayload.transactionId,
       title: transactionPayload.title,
       propertyAddress: transactionPayload.propertyAddress,
@@ -144,9 +166,13 @@ export class ElasticsearchConsumer {
       eventId: envelope.eventId,
       occurredAt: envelope.occurredAt,
     });
+
+    await this.publishStatusUpdated(envelope, transactionPayload.transactionId);
   }
 
-  private handleTransactionDelete(envelope: EventEnvelope<unknown>): void {
+  private async handleTransactionDelete(
+    envelope: EventEnvelope<unknown>,
+  ): Promise<void> {
     const payload = this.getRecordPayload(
       envelope.payload,
     ) as unknown as TransactionDeletePayload;
@@ -157,10 +183,12 @@ export class ElasticsearchConsumer {
       return;
     }
 
-    this.indexingService.deleteDocument(payload.transactionId);
+    await this.indexingService.deleteDocument(payload.transactionId);
   }
 
-  private handleAiEnriched(envelope: EventEnvelope<unknown>): void {
+  private async handleAiEnriched(
+    envelope: EventEnvelope<unknown>,
+  ): Promise<void> {
     const payload = this.getRecordPayload(
       envelope.payload,
     ) as unknown as AiEnrichedPayload;
@@ -171,7 +199,7 @@ export class ElasticsearchConsumer {
       return;
     }
 
-    this.indexingService.upsertDocument({
+    await this.indexingService.upsertDocument({
       transactionId: payload.transactionId,
       summary: payload.summary,
       improvedDescription: payload.improvedDescription,
@@ -185,9 +213,13 @@ export class ElasticsearchConsumer {
       eventId: envelope.eventId,
       occurredAt: envelope.occurredAt,
     });
+
+    await this.publishStatusUpdated(envelope, payload.transactionId);
   }
 
-  private handleAiRejected(envelope: EventEnvelope<unknown>): void {
+  private async handleAiRejected(
+    envelope: EventEnvelope<unknown>,
+  ): Promise<void> {
     const payload = this.getRecordPayload(
       envelope.payload,
     ) as unknown as AiRejectedPayload;
@@ -198,7 +230,7 @@ export class ElasticsearchConsumer {
       return;
     }
 
-    this.indexingService.upsertDocument({
+    await this.indexingService.upsertDocument({
       transactionId: payload.transactionId,
       moderationStatus: 'REJECT',
       moderationReason: payload.reason,
@@ -208,6 +240,12 @@ export class ElasticsearchConsumer {
       eventId: envelope.eventId,
       occurredAt: envelope.occurredAt,
     });
+
+    await this.publishStatusRejected(
+      envelope,
+      payload.transactionId,
+      payload.reason,
+    );
   }
 
   private getRecordPayload(payload: unknown): Record<string, unknown> {
@@ -215,5 +253,45 @@ export class ElasticsearchConsumer {
       throw new Error('Event payload must be an object');
     }
     return payload as Record<string, unknown>;
+  }
+
+  private async publishStatusUpdated(
+    sourceEnvelope: EventEnvelope<unknown>,
+    transactionId: string,
+  ): Promise<void> {
+    const payload: SearchStatusUpdatedPayload = {
+      transactionId,
+      searchStatus: 'UPDATED',
+      sourceEventId: sourceEnvelope.eventId,
+      sourceEventType: sourceEnvelope.eventType,
+    };
+
+    await this.searchEventPublisher.publish({
+      eventId: randomUUID(),
+      eventType: 'search.index.updated',
+      occurredAt: new Date().toISOString(),
+      payload,
+    });
+  }
+
+  private async publishStatusRejected(
+    sourceEnvelope: EventEnvelope<unknown>,
+    transactionId: string,
+    reason?: string,
+  ): Promise<void> {
+    const payload: SearchStatusRejectedPayload = {
+      transactionId,
+      searchStatus: 'REJECTED',
+      reason,
+      sourceEventId: sourceEnvelope.eventId,
+      sourceEventType: sourceEnvelope.eventType,
+    };
+
+    await this.searchEventPublisher.publish({
+      eventId: randomUUID(),
+      eventType: 'search.index.rejected',
+      occurredAt: new Date().toISOString(),
+      payload,
+    });
   }
 }
