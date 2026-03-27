@@ -80,6 +80,7 @@ export class ApiGatewayController {
     return {
       transactionId: data.transactionId,
       title: data.title,
+      description: data.description,
       propertyAddress: data.propertyAddress,
       price: data.price,
       buyerId: data.buyerId,

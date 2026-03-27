@@ -8,6 +8,11 @@ export class CreateTransactionRequestDto implements CreateTransactionPayload {
   @MinLength(3)
   title: string;
 
+  @ApiProperty({ example: 'Bright 2-bedroom condo near downtown amenities.' })
+  @IsString()
+  @MinLength(3)
+  description: string;
+
   @ApiProperty({ example: '123 Main St, Austin, TX' })
   @IsString()
   @MinLength(5)

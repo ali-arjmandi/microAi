@@ -5,6 +5,8 @@ export class GetTransactionDto {
 
   title: string;
 
+  description: string;
+
   propertyAddress: string;
 
   price: number;

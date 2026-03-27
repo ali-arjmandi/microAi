@@ -4,6 +4,7 @@ export enum TransactionState {
 
 export interface CreateTransactionPayload {
   title: string;
+  description: string;
   propertyAddress: string;
   price: number;
   buyerId: string;

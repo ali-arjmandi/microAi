@@ -32,6 +32,7 @@ export class TransactionsService {
         payload: {
           transactionId: created.id,
           title: created.title,
+          description: created.description ?? '',
           propertyAddress: created.propertyAddress,
           price: Number(created.price),
           buyerId: created.buyerId,
@@ -65,6 +66,7 @@ export class TransactionsService {
     return {
       transactionId: transaction.id,
       title: transaction.title,
+      description: transaction.description ?? '',
       propertyAddress: transaction.propertyAddress,
       price: Number(transaction.price),
       buyerId: transaction.buyerId,
@@ -80,6 +82,7 @@ export class TransactionsService {
     return transactions.map((item) => ({
       transactionId: item.id,
       title: item.title,
+      description: item.description ?? '',
       propertyAddress: item.propertyAddress,
       price: Number(item.price),
       buyerId: item.buyerId,

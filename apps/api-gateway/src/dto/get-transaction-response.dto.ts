@@ -8,6 +8,9 @@ export class GetTransactionResponseDto {
   @ApiProperty({ example: 'Condo Sale - Downtown' })
   title: string;
 
+  @ApiProperty({ example: 'Bright 2-bedroom condo near downtown amenities.' })
+  description: string;
+
   @ApiProperty({ example: '123 Main St, Austin, TX' })
   propertyAddress: string;
 

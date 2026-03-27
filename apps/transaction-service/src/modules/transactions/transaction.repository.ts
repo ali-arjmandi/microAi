@@ -25,6 +25,7 @@ export class TransactionRepository {
     return client.transaction.create({
       data: {
         title: payload.title,
+        description: payload.description,
         propertyAddress: payload.propertyAddress,
         price: new Prisma.Decimal(payload.price),
         buyerId: payload.buyerId,
@@ -58,6 +59,7 @@ export class TransactionRepository {
       where: {
         OR: [
           { title: { contains: query, mode: 'insensitive' } },
+          { description: { contains: query, mode: 'insensitive' } },
           { propertyAddress: { contains: query, mode: 'insensitive' } },
         ],
       },
