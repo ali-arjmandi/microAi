@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "^9.3.4",
+    "@nestjs/elasticsearch": "^11.1.0",
     "amqplib": "^0.10.9"
   },
   "devDependencies": {
