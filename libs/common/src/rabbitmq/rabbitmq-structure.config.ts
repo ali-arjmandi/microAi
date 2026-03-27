@@ -1,26 +1,29 @@
 export const rabbitmqStructureConfig = {
   apps: {
     transactionService: {
-      exchange: 'transaction.events',
       queue: 'transaction-service.queue',
-      publishRoutingKeys: [
-        'transaction.created',
-        'transaction.updated',
-        'transaction.deleted',
-      ],
-      subscribeRoutingKeys: ['search.index.updated', 'search.index.rejected'],
+      exchange: {
+        name: 'transaction.events',
+        type: 'topic',
+        durable: true,
+        bind: {
+          'transaction.created': 'search-service.queue',
+          'transaction.updated': 'search-service.queue',
+          'transaction.deleted': 'search-service.queue',
+        },
+      },
     },
     searchService: {
-      exchange: 'search.events',
       queue: 'search-service.queue',
-      publishRoutingKeys: ['search.index.updated', 'search.index.rejected'],
-      subscribeRoutingKeys: [
-        'transaction.created',
-        'transaction.updated',
-        'transaction.deleted',
-        'ai.enriched',
-        'ai.rejected',
-      ],
+      exchange: {
+        name: 'search.events',
+        type: 'topic',
+        durable: true,
+        bind: {
+          'search.index.updated': 'transaction-service.queue',
+          'search.index.rejected': 'transaction-service.queue',
+        },
+      },
     },
   },
 } as const;

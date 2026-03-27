@@ -7,7 +7,7 @@ import {
   buildVersionedName,
   getSearchEventsExchange,
   getSearchQueueName,
-  getSearchSubscribeRoutingKeys,
+  getSearchQueueBindingTargets,
   normalizeRoutingKey,
 } from './rabbitmq.config';
 
@@ -28,9 +28,7 @@ export class RabbitMqStartupService {
       version,
     );
     const queueName = buildVersionedName(getSearchQueueName(), version);
-    const subscribeRoutingKeys = getSearchSubscribeRoutingKeys().map((key) =>
-      normalizeRoutingKey(key, version),
-    );
+    const bindingTargets = getSearchQueueBindingTargets();
 
     try {
       if (!searchEventsExchangeName && !queueName) {
@@ -43,26 +41,35 @@ export class RabbitMqStartupService {
       await this.connectionService.connect();
       const channel = this.connectionService.getChannel();
 
+      if (queueName) {
+        await channel.assertQueue(queueName, { durable: true });
+      }
+
       if (searchEventsExchangeName) {
         await channel.assertExchange(searchEventsExchangeName, 'topic', {
           durable: true,
         });
       }
-      if (queueName) {
-        await channel.assertQueue(queueName, { durable: true });
-      }
 
-      if (
-        searchEventsExchangeName &&
-        queueName &&
-        subscribeRoutingKeys.length > 0
-      ) {
-        for (const routingKey of subscribeRoutingKeys) {
-          await channel.bindQueue(
-            queueName,
-            searchEventsExchangeName,
-            routingKey,
+      if (queueName && bindingTargets.length > 0) {
+        for (const binding of bindingTargets) {
+          const bindingExchangeName = buildVersionedName(
+            binding.exchangeName,
+            version,
           );
+          const routingKey = normalizeRoutingKey(binding.routingKey, version);
+          if (!bindingExchangeName) {
+            continue;
+          }
+
+          await channel.assertExchange(
+            bindingExchangeName,
+            binding.exchangeType,
+            {
+              durable: binding.exchangeDurable,
+            },
+          );
+          await channel.bindQueue(queueName, bindingExchangeName, routingKey);
         }
       }
 
@@ -96,9 +103,7 @@ export class RabbitMqStartupService {
       this.logger.log(
         `RabbitMQ startup ready: exchange=${
           searchEventsExchangeName ?? 'none'
-        }, queue=${queueName ?? 'none'}, bindings=${
-          subscribeRoutingKeys.length
-        }`,
+        }, queue=${queueName ?? 'none'}, bindings=${bindingTargets.length}`,
       );
     } catch (error) {
       this.logger.error(

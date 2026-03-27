@@ -10,14 +10,52 @@ export const rabbitMqConfig = (): RabbitMqConfig => ({
   version: process.env.RABBITMQ_VERSION,
 });
 
+type ExchangeDefinition = {
+  name: string;
+  type: string;
+  durable: boolean;
+  bind: Record<string, string>;
+};
+
+export interface QueueBindingTarget {
+  exchangeName: string;
+  exchangeType: string;
+  exchangeDurable: boolean;
+  routingKey: string;
+}
+
 export const getSearchEventsExchange = (): string | null =>
-  rabbitmqStructureConfig.apps.searchService.exchange;
+  rabbitmqStructureConfig.apps.searchService.exchange.name;
 
 export const getSearchQueueName = (): string | null =>
   rabbitmqStructureConfig.apps.searchService.queue;
 
-export const getSearchSubscribeRoutingKeys = (): readonly string[] =>
-  rabbitmqStructureConfig.apps.searchService.subscribeRoutingKeys;
+export const getSearchQueueBindingTargets = (): QueueBindingTarget[] => {
+  const queueName = getSearchQueueName();
+  if (!queueName) {
+    return [];
+  }
+
+  const exchanges = Object.values(rabbitmqStructureConfig.apps).map(
+    (app) => app.exchange as ExchangeDefinition,
+  );
+
+  const bindings: QueueBindingTarget[] = [];
+  for (const exchange of exchanges) {
+    for (const [routingKey, bindQueue] of Object.entries(exchange.bind)) {
+      if (bindQueue === queueName) {
+        bindings.push({
+          exchangeName: exchange.name,
+          exchangeType: exchange.type,
+          exchangeDurable: exchange.durable,
+          routingKey,
+        });
+      }
+    }
+  }
+
+  return bindings;
+};
 
 export const buildVersionedName = (
   base: string | null | undefined,
