@@ -3,6 +3,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { IndexingService } from './elasticsearch.indexing.service';
 import { SearchEventPublisher } from '../rabbitmq/search-event.publisher';
+import { SearchDocument } from './search-document.model';
 
 interface TransactionUpsertPayload {
   transactionId?: string;
@@ -154,6 +155,11 @@ export class ElasticsearchConsumer {
     }
 
     const transactionPayload = payload as unknown as TransactionUpsertPayload;
+    const existingDocument = await this.indexingService.getDocument(
+      transactionPayload.transactionId,
+    );
+    const isModerationRejected = this.isModerationRejected(existingDocument);
+
     await this.indexingService.upsertDocument({
       transactionId: transactionPayload.transactionId,
       title: transactionPayload.title,
@@ -162,6 +168,7 @@ export class ElasticsearchConsumer {
       buyerId: transactionPayload.buyerId,
       sellerId: transactionPayload.sellerId,
       state: transactionPayload.state,
+      searchStatus: isModerationRejected ? 'FAILED' : 'READY',
       eventType: envelope.eventType,
       eventId: envelope.eventId,
       occurredAt: envelope.occurredAt,
@@ -199,6 +206,13 @@ export class ElasticsearchConsumer {
       return;
     }
 
+    const existingDocument = await this.indexingService.getDocument(
+      payload.transactionId,
+    );
+    const hasBaseTransactionData =
+      this.hasBaseTransactionData(existingDocument);
+    const nextSearchStatus = hasBaseTransactionData ? 'READY' : 'PENDING_BASE';
+
     await this.indexingService.upsertDocument({
       transactionId: payload.transactionId,
       summary: payload.summary,
@@ -209,12 +223,15 @@ export class ElasticsearchConsumer {
         : undefined,
       aiStatus: 'COMPLETED',
       moderationStatus: 'ALLOW',
+      searchStatus: nextSearchStatus,
       eventType: envelope.eventType,
       eventId: envelope.eventId,
       occurredAt: envelope.occurredAt,
     });
 
-    await this.publishStatusUpdated(envelope, payload.transactionId);
+    if (hasBaseTransactionData) {
+      await this.publishStatusUpdated(envelope, payload.transactionId);
+    }
   }
 
   private async handleAiRejected(
@@ -230,12 +247,18 @@ export class ElasticsearchConsumer {
       return;
     }
 
+    const existingDocument = await this.indexingService.getDocument(
+      payload.transactionId,
+    );
+    const hasBaseTransactionData =
+      this.hasBaseTransactionData(existingDocument);
+
     await this.indexingService.upsertDocument({
       transactionId: payload.transactionId,
       moderationStatus: 'REJECT',
       moderationReason: payload.reason,
       aiStatus: 'FAILED',
-      searchStatus: 'FAILED',
+      searchStatus: hasBaseTransactionData ? 'FAILED' : 'PENDING_BASE',
       eventType: envelope.eventType,
       eventId: envelope.eventId,
       occurredAt: envelope.occurredAt,
@@ -253,6 +276,29 @@ export class ElasticsearchConsumer {
       throw new Error('Event payload must be an object');
     }
     return payload as Record<string, unknown>;
+  }
+
+  private hasBaseTransactionData(
+    doc: SearchDocument | null | undefined,
+  ): boolean {
+    if (!doc) {
+      return false;
+    }
+    return Boolean(
+      doc.title ||
+        doc.propertyAddress ||
+        doc.price !== undefined ||
+        doc.buyerId ||
+        doc.sellerId ||
+        doc.state ||
+        doc.transactionState,
+    );
+  }
+
+  private isModerationRejected(
+    doc: SearchDocument | null | undefined,
+  ): boolean {
+    return doc?.moderationStatus?.trim().toUpperCase() === 'REJECT';
   }
 
   private async publishStatusUpdated(

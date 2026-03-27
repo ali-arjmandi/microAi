@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { ELASTICSEARCH_CLIENT } from './elasticsearch.constants';
 import { SEARCH_INDEX_NAME_DEFAULT } from './elasticsearch.index.schema';
 import { DocumentMapper } from './document.mapper';
-import { SearchDocumentPatch } from './search-document.model';
+import { SearchDocument, SearchDocumentPatch } from './search-document.model';
 
 @Injectable()
 export class IndexingService {
@@ -28,6 +28,27 @@ export class IndexingService {
     });
 
     this.logger.debug(`Upserted search document transactionId="${id}"`);
+  }
+
+  async getDocument(transactionId: string): Promise<SearchDocument | null> {
+    const indexName = this.getIndexName();
+    const id = transactionId.trim();
+    if (!id) {
+      throw new Error('transactionId is required to get search document');
+    }
+
+    try {
+      const response = await this.client.get<SearchDocument>({
+        index: indexName,
+        id,
+      });
+      return response._source ?? null;
+    } catch (error) {
+      if (this.isNotFound(error)) {
+        return null;
+      }
+      throw error;
+    }
   }
 
   async deleteDocument(transactionId: string): Promise<void> {
