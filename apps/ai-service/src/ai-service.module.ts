@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 import { resolve } from 'path';
-import { AiServiceController } from './ai-service.controller';
-import { AiServiceService } from './ai-service.service';
+import { RabbitMqModule } from './modules/rabbitmq/rabbitmq.module';
+import { AiServiceStartupOrchestrator } from './ai-service.startup.orchestrator';
 
 @Module({
   imports: [
@@ -12,10 +12,14 @@ import { AiServiceService } from './ai-service.service';
       envFilePath: [resolve(process.cwd(), 'apps/ai-service/.env')],
       validationSchema: Joi.object({
         PORT: Joi.number().port().default(3004),
+        RABBITMQ_URL: Joi.string()
+          .uri({ scheme: ['amqp', 'amqps'] })
+          .required(),
+        RABBITMQ_VERSION: Joi.string().optional(),
       }),
     }),
+    RabbitMqModule,
   ],
-  controllers: [AiServiceController],
-  providers: [AiServiceService],
+  providers: [AiServiceStartupOrchestrator],
 })
 export class AiServiceModule {}

@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AiServiceModule } from './ai-service.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AiServiceModule);
-  await app.listen(process.env.PORT ?? 3004);
+  const app = await NestFactory.createApplicationContext(AiServiceModule);
+  app.enableShutdownHooks();
 }
 bootstrap();
