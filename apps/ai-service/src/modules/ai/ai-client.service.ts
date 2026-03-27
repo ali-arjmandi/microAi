@@ -4,16 +4,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AiEnrichmentResult } from './ai.types';
-
-interface TransactionInput {
-  transactionId?: string;
-  title?: string;
-  description?: string;
-  propertyAddress?: string;
-  state?: string;
-  price?: number;
-}
+import { AiEnrichmentResult, ListingEnrichmentInput } from './ai.types';
 
 interface OpenRouterChoice {
   message?: {
@@ -32,7 +23,7 @@ export class AiClientService {
   constructor(private readonly configService: ConfigService) {}
 
   async generateEnrichment(
-    transaction: TransactionInput,
+    listing: ListingEnrichmentInput,
   ): Promise<AiEnrichmentResult> {
     const systemPrompt = [
       'You produce strict JSON only.',
@@ -42,8 +33,8 @@ export class AiClientService {
     ].join(' ');
 
     const userPrompt = [
-      'Create concise enrichment for the transaction:',
-      JSON.stringify(transaction),
+      'Create concise enrichment for this property listing (use only the provided fields):',
+      JSON.stringify(listing),
       'Return valid JSON that matches the required keys and types.',
     ].join('\n');
 

@@ -8,6 +8,7 @@ import {
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
+import { ListingEnrichmentInput } from '../../ai/ai.types';
 import { AiClientService } from '../../ai/ai-client.service';
 import { AiEventPublisher } from '../publishers/ai-event.publisher';
 
@@ -58,8 +59,9 @@ export class AiConsumer {
       this.configService.get<string>('OPENROUTER_MODEL') ?? 'openrouter/free';
     const promptVersion = 'v1';
     try {
+      const listingContext = this.buildListingEnrichmentInput(transaction);
       const enrichment = await this.aiClientService.generateEnrichment(
-        transaction,
+        listingContext,
       );
 
       if (enrichment.moderation.status === 'REJECT') {
@@ -139,6 +141,18 @@ export class AiConsumer {
       throw new Error('Event payload must be an object');
     }
     return payload as TransactionPayload;
+  }
+
+  private buildListingEnrichmentInput(
+    transaction: TransactionPayload,
+  ): ListingEnrichmentInput {
+    return {
+      title: transaction.title,
+      description: transaction.description,
+      propertyAddress: transaction.propertyAddress,
+      price: transaction.price,
+      state: transaction.state,
+    };
   }
 
   private normalizeEventType(eventType: string): string {

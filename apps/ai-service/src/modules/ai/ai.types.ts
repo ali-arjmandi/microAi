@@ -1,3 +1,11 @@
+export interface ListingEnrichmentInput {
+  title?: string;
+  description?: string;
+  propertyAddress?: string;
+  price?: number;
+  state?: string;
+}
+
 export interface AiModerationResult {
   status: 'ALLOW' | 'REJECT' | 'REVIEW';
   reason: string;
