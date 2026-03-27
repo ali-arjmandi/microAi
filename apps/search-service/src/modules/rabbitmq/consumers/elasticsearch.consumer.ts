@@ -8,6 +8,7 @@ import { SearchDocument } from '../../elasticsearch/search-document.model';
 interface TransactionUpsertPayload {
   transactionId?: string;
   title?: string;
+  description?: string;
   propertyAddress?: string;
   price?: number;
   buyerId?: string;
@@ -183,6 +184,7 @@ export class ElasticsearchConsumer {
     await this.indexingService.upsertDocument({
       transactionId: transactionPayload.transactionId,
       title: transactionPayload.title,
+      description: transactionPayload.description,
       propertyAddress: transactionPayload.propertyAddress,
       price: transactionPayload.price,
       buyerId: transactionPayload.buyerId,
@@ -306,6 +308,7 @@ export class ElasticsearchConsumer {
     }
     return Boolean(
       doc.title ||
+        doc.description ||
         doc.propertyAddress ||
         doc.price !== undefined ||
         doc.buyerId ||

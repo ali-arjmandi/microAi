@@ -11,6 +11,7 @@ export interface SearchDocument {
   moderationStatus?: string;
   tags?: string[];
   title?: string;
+  description?: string;
   propertyAddress?: string;
   summary?: string;
   improvedDescription?: string;

@@ -103,6 +103,7 @@
       "<rootDir>/libs/"
     ],
     "moduleNameMapper": {
+      "^apps/(.*)$": "<rootDir>/apps/$1",
       "^@app/common(|/.*)$": "<rootDir>/libs/common/src/$1"
     }
   }

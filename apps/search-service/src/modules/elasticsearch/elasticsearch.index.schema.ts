@@ -20,6 +20,12 @@ export const SEARCH_INDEX_MAPPINGS: Record<string, estypes.MappingProperty> = {
       keyword: { type: 'keyword' as const, ignore_above: 256 },
     },
   },
+  description: {
+    type: 'text' as const,
+    fields: {
+      keyword: { type: 'keyword' as const, ignore_above: 256 },
+    },
+  },
   propertyAddress: {
     type: 'text' as const,
     fields: {

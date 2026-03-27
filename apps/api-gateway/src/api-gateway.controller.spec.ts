@@ -29,6 +29,7 @@ describe('ApiGatewayController', () => {
       await expect(
         apiGatewayController.createTransaction({
           title: 'Condo',
+          description: 'Condo with skyline views',
           propertyAddress: '123 Main St',
           price: 100000,
           buyerId: 'buyer-1',

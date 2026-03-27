@@ -30,12 +30,14 @@ describe('ElasticsearchConsumer', () => {
       payload: {
         transactionId: 'tx-1',
         title: 'Home sale',
+        description: 'Sunny two-bedroom condo near city center',
       },
     });
 
     expect(indexingServiceMock.upsertDocument).toHaveBeenCalledWith(
       expect.objectContaining({
         transactionId: 'tx-1',
+        description: 'Sunny two-bedroom condo near city center',
         searchStatus: 'READY',
         eventId: 'evt-1',
         eventType: 'transaction.created.v1',
