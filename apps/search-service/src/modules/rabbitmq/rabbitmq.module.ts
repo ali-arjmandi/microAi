@@ -2,8 +2,10 @@ import { Module } from '@nestjs/common';
 import { RabbitMqConnectionService } from './rabbitmq.connection.service';
 import { RabbitMqStartupService } from './rabbitmq.startup.service';
 import { SearchEventPublisher } from './search-event.publisher';
+import { ElasticsearchModule } from '../elasticsearch/elasticsearch.module';
 
 @Module({
+  imports: [ElasticsearchModule],
   providers: [
     RabbitMqConnectionService,
     RabbitMqStartupService,

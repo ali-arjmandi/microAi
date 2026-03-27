@@ -14,7 +14,7 @@ import { ElasticsearchConsumer } from './elasticsearch.consumer';
   exports: [
     elasticsearchClientProvider,
     ElasticsearchBootstrapService,
-    IndexingService,
+    ElasticsearchConsumer,
   ],
 })
 export class ElasticsearchModule {}

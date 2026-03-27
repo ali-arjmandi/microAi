@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { RabbitMqConnectionService } from './rabbitmq.connection.service';
+import { ConsumeMessage } from 'amqplib';
+import { ElasticsearchConsumer } from '../elasticsearch/elasticsearch.consumer';
 import {
   buildVersionedName,
   getSearchEventsExchange,
@@ -16,6 +18,7 @@ export class RabbitMqStartupService {
   constructor(
     private readonly connectionService: RabbitMqConnectionService,
     private readonly configService: ConfigService,
+    private readonly elasticsearchConsumer: ElasticsearchConsumer,
   ) {}
 
   async initialize(): Promise<void> {
@@ -61,6 +64,33 @@ export class RabbitMqStartupService {
             routingKey,
           );
         }
+      }
+
+      if (queueName) {
+        await channel.consume(
+          queueName,
+          async (message: ConsumeMessage | null) => {
+            if (!message) {
+              return;
+            }
+
+            try {
+              const decodedContent = message.content.toString('utf-8');
+              const payload = JSON.parse(decodedContent) as unknown;
+              await Promise.resolve(
+                this.elasticsearchConsumer.handleMessage(payload),
+              );
+              channel.ack(message);
+            } catch (error) {
+              this.logger.error(
+                `Failed to process message from queue "${queueName}"`,
+                error instanceof Error ? error.stack : String(error),
+              );
+              channel.nack(message, false, false);
+            }
+          },
+          { noAck: false },
+        );
       }
 
       this.logger.log(
