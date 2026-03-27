@@ -1,6 +1,6 @@
 import { EventEnvelope } from '@app/common';
 import { Injectable, Logger } from '@nestjs/common';
-import { IndexingService } from '../../../indexing/indexing.service';
+import { IndexingService } from './elasticsearch.indexing.service';
 
 interface TransactionUpsertPayload {
   transactionId?: string;
@@ -30,8 +30,8 @@ interface AiRejectedPayload {
 }
 
 @Injectable()
-export class TransactionEventsConsumer {
-  private readonly logger = new Logger(TransactionEventsConsumer.name);
+export class ElasticsearchConsumer {
+  private readonly logger = new Logger(ElasticsearchConsumer.name);
   private readonly processedEventIds = new Set<string>();
   private readonly processedEventQueue: string[] = [];
   private readonly maxTrackedEventIds = 10_000;

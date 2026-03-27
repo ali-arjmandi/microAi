@@ -5,7 +5,6 @@ import { resolve } from 'path';
 import { SearchServiceController } from './search-service.controller';
 import { SearchServiceService } from './search-service.service';
 import { HealthController } from './health/health.controller';
-import { TransactionEventsConsumer } from './modules/rabbitmq/consumers/transaction-events.consumer';
 import { RabbitMqModule } from './modules/rabbitmq/rabbitmq.module';
 import { SearchServiceStartupOrchestrator } from './search-service.startup.orchestrator';
 import { ElasticsearchModule } from './modules/elasticsearch/elasticsearch.module';
@@ -31,10 +30,6 @@ import { ElasticsearchModule } from './modules/elasticsearch/elasticsearch.modul
     ElasticsearchModule,
   ],
   controllers: [SearchServiceController, HealthController],
-  providers: [
-    SearchServiceService,
-    TransactionEventsConsumer,
-    SearchServiceStartupOrchestrator,
-  ],
+  providers: [SearchServiceService, SearchServiceStartupOrchestrator],
 })
 export class SearchServiceModule {}
