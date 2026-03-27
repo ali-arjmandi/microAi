@@ -40,6 +40,9 @@ export class RabbitMqStartupService {
 
       await this.connectionService.connect();
       const channel = this.connectionService.getChannel();
+      const prefetch = Number(
+        this.configService.get<number>('RABBITMQ_PREFETCH'),
+      );
 
       if (queueName) {
         await channel.assertQueue(queueName, { durable: true });
@@ -57,8 +60,12 @@ export class RabbitMqStartupService {
             binding.exchangeName,
             version,
           );
+          const targetQueueName = buildVersionedName(
+            binding.queueName,
+            version,
+          );
           const routingKey = normalizeRoutingKey(binding.routingKey, version);
-          if (!bindingExchangeName) {
+          if (!bindingExchangeName || !targetQueueName) {
             continue;
           }
 
@@ -69,11 +76,17 @@ export class RabbitMqStartupService {
               durable: binding.exchangeDurable,
             },
           );
-          await channel.bindQueue(queueName, bindingExchangeName, routingKey);
+          await channel.assertQueue(targetQueueName, { durable: true });
+          await channel.bindQueue(
+            targetQueueName,
+            bindingExchangeName,
+            routingKey,
+          );
         }
       }
 
       if (queueName) {
+        await channel.prefetch(prefetch);
         await channel.consume(
           queueName,
           async (message: ConsumeMessage | null) => {
@@ -113,7 +126,9 @@ export class RabbitMqStartupService {
       this.logger.log(
         `RabbitMQ startup ready: exchange=${
           aiEventsExchangeName ?? 'none'
-        }, queue=${queueName ?? 'none'}, bindings=${bindingTargets.length}`,
+        }, queue=${queueName ?? 'none'}, prefetch=${prefetch}, bindings=${
+          bindingTargets.length
+        }`,
       );
     } catch (error) {
       this.logger.error(
