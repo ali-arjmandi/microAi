@@ -25,7 +25,7 @@ describe('ElasticsearchConsumer', () => {
   it('upserts and publishes status for transaction.created events', async () => {
     await consumer.handleMessage({
       eventId: 'evt-1',
-      eventType: 'transaction.created.v1',
+      eventType: 'transaction.created',
       occurredAt: '2026-03-27T00:00:00.000Z',
       payload: {
         transactionId: 'tx-1',
@@ -40,7 +40,7 @@ describe('ElasticsearchConsumer', () => {
         description: 'Sunny two-bedroom condo near city center',
         searchStatus: 'READY',
         eventId: 'evt-1',
-        eventType: 'transaction.created.v1',
+        eventType: 'transaction.created',
       }),
     );
     expect(publisherMock.publish).toHaveBeenCalledWith(
@@ -58,7 +58,7 @@ describe('ElasticsearchConsumer', () => {
   it('skips duplicate eventIds for idempotency', async () => {
     const message = {
       eventId: 'evt-dup',
-      eventType: 'transaction.created.v1',
+      eventType: 'transaction.created',
       occurredAt: '2026-03-27T00:00:00.000Z',
       payload: {
         transactionId: 'tx-dup',
@@ -77,7 +77,7 @@ describe('ElasticsearchConsumer', () => {
 
     await consumer.handleMessage({
       eventId: 'evt-ai-first',
-      eventType: 'ai.enriched.v1',
+      eventType: 'ai.enriched',
       occurredAt: '2026-03-27T00:00:00.000Z',
       payload: {
         transactionId: 'tx-ai-first',

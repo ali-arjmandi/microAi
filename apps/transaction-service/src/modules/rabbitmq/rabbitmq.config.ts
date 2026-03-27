@@ -21,6 +21,7 @@ export interface QueueBindingTarget {
   exchangeName: string;
   exchangeType: string;
   exchangeDurable: boolean;
+  queueName: string;
   routingKey: string;
 }
 
@@ -31,26 +32,21 @@ export const getTransactionQueueName = (): string | null =>
   rabbitmqStructureConfig.apps.transactionService.queue;
 
 export const getTransactionQueueBindingTargets = (): QueueBindingTarget[] => {
-  const queueName = getTransactionQueueName();
-  if (!queueName) {
-    return [];
-  }
-
-  const exchanges = Object.values(rabbitmqStructureConfig.apps).map(
-    (app) => app.exchange as ExchangeDefinition,
-  );
+  const transactionExchange = rabbitmqStructureConfig.apps.transactionService
+    .exchange as ExchangeDefinition;
 
   const bindings: QueueBindingTarget[] = [];
-  for (const exchange of exchanges) {
-    for (const [routingKey, bindQueue] of Object.entries(exchange.bind)) {
-      if (bindQueue.includes(queueName)) {
-        bindings.push({
-          exchangeName: exchange.name,
-          exchangeType: exchange.type,
-          exchangeDurable: exchange.durable,
-          routingKey,
-        });
-      }
+  for (const [routingKey, bindQueue] of Object.entries(
+    transactionExchange.bind,
+  )) {
+    for (const targetQueueName of bindQueue) {
+      bindings.push({
+        exchangeName: transactionExchange.name,
+        exchangeType: transactionExchange.type,
+        exchangeDurable: transactionExchange.durable,
+        queueName: targetQueueName,
+        routingKey,
+      });
     }
   }
 

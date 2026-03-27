@@ -25,6 +25,7 @@ import { ReadinessService } from './health/readiness.service';
           .uri({ scheme: ['amqp', 'amqps'] })
           .required(),
         RABBITMQ_VERSION: Joi.string().optional(),
+        RABBITMQ_PREFETCH: Joi.number().integer().min(1).max(500).default(10),
       }),
     }),
     RabbitMqModule,

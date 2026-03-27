@@ -40,6 +40,9 @@ export class RabbitMqStartupService {
 
       await this.connectionService.connect();
       const channel = this.connectionService.getChannel();
+      const prefetch = Number(
+        this.configService.get<number>('RABBITMQ_PREFETCH'),
+      );
 
       if (queueName) {
         await channel.assertQueue(queueName, { durable: true });
@@ -121,7 +124,9 @@ export class RabbitMqStartupService {
       this.logger.log(
         `RabbitMQ startup ready: exchange=${
           searchEventsExchangeName ?? 'none'
-        }, queue=${queueName ?? 'none'}, bindings=${bindingTargets.length}`,
+        }, queue=${queueName ?? 'none'}, prefetch=${prefetch}, bindings=${
+          bindingTargets.length
+        }`,
       );
     } catch (error) {
       this.logger.error(
