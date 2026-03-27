@@ -53,8 +53,9 @@ export class RabbitMqStartupService {
             binding.exchangeName,
             version,
           );
+          const targetQueueName = buildVersionedName(binding.queueName, version);
           const routingKey = normalizeRoutingKey(binding.routingKey, version);
-          if (!bindingExchangeName) {
+          if (!bindingExchangeName || !targetQueueName) {
             continue;
           }
 
@@ -65,7 +66,12 @@ export class RabbitMqStartupService {
               durable: binding.exchangeDurable,
             },
           );
-          await channel.bindQueue(queueName, bindingExchangeName, routingKey);
+          await channel.assertQueue(targetQueueName, { durable: true });
+          await channel.bindQueue(
+            targetQueueName,
+            bindingExchangeName,
+            routingKey,
+          );
         }
       }
 
