@@ -3,9 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { RabbitMqConnectionService } from './rabbitmq.connection.service';
 import {
   buildVersionedName,
-  getTransactionQueueName,
-  getTransactionSubscribeRoutingKeys,
-  getTransactionOutboxExchange,
+  getSearchEventsExchange,
+  getSearchQueueName,
+  getSearchSubscribeRoutingKeys,
   normalizeRoutingKey,
 } from './rabbitmq.config';
 
@@ -20,27 +20,28 @@ export class RabbitMqStartupService {
 
   async initialize(): Promise<void> {
     const version = this.configService.get<string>('RABBITMQ_VERSION');
-    const transactionExchangeName = buildVersionedName(
-      getTransactionOutboxExchange(),
+    const searchEventsExchangeName = buildVersionedName(
+      getSearchEventsExchange(),
       version,
     );
-    const queueName = buildVersionedName(getTransactionQueueName(), version);
-    const subscribeRoutingKeys = getTransactionSubscribeRoutingKeys().map(
-      (key) => normalizeRoutingKey(key, version),
+    const queueName = buildVersionedName(getSearchQueueName(), version);
+    const subscribeRoutingKeys = getSearchSubscribeRoutingKeys().map((key) =>
+      normalizeRoutingKey(key, version),
     );
 
     try {
-      if (!transactionExchangeName && !queueName) {
+      if (!searchEventsExchangeName && !queueName) {
         this.logger.log(
-          'RabbitMQ startup skipped: transaction exchange and queue are not configured',
+          'RabbitMQ startup skipped: search exchange and queue are not configured',
         );
         return;
       }
 
       await this.connectionService.connect();
       const channel = this.connectionService.getChannel();
-      if (transactionExchangeName) {
-        await channel.assertExchange(transactionExchangeName, 'topic', {
+
+      if (searchEventsExchangeName) {
+        await channel.assertExchange(searchEventsExchangeName, 'topic', {
           durable: true,
         });
       }
@@ -49,14 +50,14 @@ export class RabbitMqStartupService {
       }
 
       if (
-        transactionExchangeName &&
+        searchEventsExchangeName &&
         queueName &&
         subscribeRoutingKeys.length > 0
       ) {
         for (const routingKey of subscribeRoutingKeys) {
           await channel.bindQueue(
             queueName,
-            transactionExchangeName,
+            searchEventsExchangeName,
             routingKey,
           );
         }
@@ -64,7 +65,7 @@ export class RabbitMqStartupService {
 
       this.logger.log(
         `RabbitMQ startup ready: exchange=${
-          transactionExchangeName ?? 'none'
+          searchEventsExchangeName ?? 'none'
         }, queue=${queueName ?? 'none'}, bindings=${
           subscribeRoutingKeys.length
         }`,

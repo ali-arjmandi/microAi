@@ -1,35 +1,34 @@
+import { EventEnvelope } from '@app/common';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EventEnvelope } from '@app/common';
-import { RabbitMqConnectionService } from '../rabbitmq/rabbitmq.connection.service';
+import { RabbitMqConnectionService } from './rabbitmq.connection.service';
 import {
   buildVersionedName,
-  getTransactionOutboxExchange,
+  getSearchEventsExchange,
   normalizeRoutingKey,
-} from '../rabbitmq/rabbitmq.config';
+} from './rabbitmq.config';
 
 @Injectable()
-export class OutboxPublisher {
-  private readonly logger = new Logger(OutboxPublisher.name);
+export class SearchEventPublisher {
+  private readonly logger = new Logger(SearchEventPublisher.name);
 
   constructor(
     private readonly connectionService: RabbitMqConnectionService,
     private readonly configService: ConfigService,
   ) {}
 
-  async publish(event: { eventType: string; payload: unknown }): Promise<void> {
+  async publish(payload: unknown): Promise<void> {
+    const envelope = this.getEnvelope(payload);
     const version = this.configService.get<string>('RABBITMQ_VERSION');
-    const routingKey = this.mapRoutingKey(event.eventType, version);
-    const envelope = this.getEnvelope(event.payload);
-    const exchangeBase = getTransactionOutboxExchange();
-    const exchange = buildVersionedName(exchangeBase, version);
+    const exchange = buildVersionedName(getSearchEventsExchange(), version);
     if (!exchange) {
       this.logger.warn(
-        `Skipping publish for event "${envelope.eventType}" because transaction exchange is not configured`,
+        `Skipping publish for event "${envelope.eventType}" because search exchange is not configured`,
       );
       return;
     }
 
+    const routingKey = normalizeRoutingKey(envelope.eventType, version);
     const channel = this.connectionService.getChannel();
     const content = Buffer.from(JSON.stringify(envelope));
 
@@ -61,13 +60,9 @@ export class OutboxPublisher {
     });
   }
 
-  private mapRoutingKey(eventType: string, version?: string): string {
-    return normalizeRoutingKey(eventType, version);
-  }
-
   private getEnvelope(payload: unknown): EventEnvelope<unknown> {
     if (!payload || typeof payload !== 'object') {
-      throw new Error('Outbox payload must be an event envelope object');
+      throw new Error('Search event payload must be an event envelope object');
     }
 
     const maybeEnvelope = payload as Partial<EventEnvelope<unknown>>;
@@ -76,7 +71,7 @@ export class OutboxPublisher {
       typeof maybeEnvelope.eventType !== 'string'
     ) {
       throw new Error(
-        'Outbox payload is missing required envelope fields: eventId/eventType',
+        'Search event payload is missing required envelope fields: eventId/eventType',
       );
     }
 

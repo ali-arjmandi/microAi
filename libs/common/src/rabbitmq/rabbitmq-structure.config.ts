@@ -2,7 +2,7 @@ export const rabbitmqStructureConfig = {
   apps: {
     transactionService: {
       exchange: 'transaction.events',
-      queue: null,
+      queue: 'transaction-service.queue',
       publishRoutingKeys: [
         'transaction.created',
         'transaction.updated',

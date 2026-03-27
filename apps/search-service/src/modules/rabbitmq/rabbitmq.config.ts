@@ -10,14 +10,14 @@ export const rabbitMqConfig = (): RabbitMqConfig => ({
   version: process.env.RABBITMQ_VERSION,
 });
 
-export const getTransactionOutboxExchange = (): string | null =>
-  rabbitmqStructureConfig.apps.transactionService.exchange;
+export const getSearchEventsExchange = (): string | null =>
+  rabbitmqStructureConfig.apps.searchService.exchange;
 
-export const getTransactionQueueName = (): string | null =>
-  rabbitmqStructureConfig.apps.transactionService.queue;
+export const getSearchQueueName = (): string | null =>
+  rabbitmqStructureConfig.apps.searchService.queue;
 
-export const getTransactionSubscribeRoutingKeys = (): readonly string[] =>
-  rabbitmqStructureConfig.apps.transactionService.subscribeRoutingKeys;
+export const getSearchSubscribeRoutingKeys = (): readonly string[] =>
+  rabbitmqStructureConfig.apps.searchService.subscribeRoutingKeys;
 
 export const buildVersionedName = (
   base: string | null | undefined,
@@ -52,5 +52,6 @@ export const normalizeRoutingKey = (
   if (!baseEventType) {
     return normalizedEventType;
   }
+
   return buildVersionedName(baseEventType, version);
 };

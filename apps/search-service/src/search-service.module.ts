@@ -8,6 +8,8 @@ import { HealthController } from './health/health.controller';
 import { TransactionEventsConsumer } from './consumers/transaction-events.consumer';
 import { IndexingService } from './indexing/indexing.service';
 import { mapTransactionEventToSearchDocument } from './indexing/document.mapper';
+import { RabbitMqModule } from './modules/rabbitmq/rabbitmq.module';
+import { SearchServiceStartupOrchestrator } from './search-service.startup.orchestrator';
 
 @Module({
   imports: [
@@ -23,9 +25,10 @@ import { mapTransactionEventToSearchDocument } from './indexing/document.mapper'
         RABBITMQ_URL: Joi.string()
           .uri({ scheme: ['amqp', 'amqps'] })
           .required(),
-        RABBITMQ_QUEUE: Joi.string().default('transaction.events'),
+        RABBITMQ_VERSION: Joi.string().optional(),
       }),
     }),
+    RabbitMqModule,
   ],
   controllers: [SearchServiceController, HealthController],
   providers: [
@@ -36,6 +39,7 @@ import { mapTransactionEventToSearchDocument } from './indexing/document.mapper'
       provide: 'SEARCH_DOCUMENT_MAPPER',
       useValue: mapTransactionEventToSearchDocument,
     },
+    SearchServiceStartupOrchestrator,
   ],
 })
 export class SearchServiceModule {}
