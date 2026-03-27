@@ -5,7 +5,7 @@ import { resolve } from 'path';
 import { SearchServiceController } from './search-service.controller';
 import { SearchServiceService } from './search-service.service';
 import { HealthController } from './health/health.controller';
-import { TransactionEventsConsumer } from './consumers/transaction-events.consumer';
+import { TransactionEventsConsumer } from './modules/rabbitmq/consumers/transaction-events.consumer';
 import { IndexingService } from './indexing/indexing.service';
 import { mapTransactionEventToSearchDocument } from './indexing/document.mapper';
 import { RabbitMqModule } from './modules/rabbitmq/rabbitmq.module';
