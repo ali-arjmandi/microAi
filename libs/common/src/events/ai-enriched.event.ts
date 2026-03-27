@@ -6,11 +6,11 @@ export interface AiModerationResult {
   confidence: number;
 }
 
-export interface AiEnrichedEventV1 {
+export interface AiEnrichedEvent {
   transactionId: string;
   summary: string;
   riskNarrative: string;
-  searchTags: string[];
+  tags: string[];
   improvedDescription: string;
   moderation: AiModerationResult;
   model: string;

@@ -1,8 +1,4 @@
-import {
-  AiEnrichedEventV1,
-  AiRejectedEventV1,
-  EventEnvelope,
-} from '@app/common';
+import { AiEnrichedEvent, AiRejectedEventV1, EventEnvelope } from '@app/common';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { RabbitMqConnectionService } from '../rabbitmq.connection.service';
@@ -22,7 +18,7 @@ export class AiEventPublisher {
   ) {}
 
   async publishEnriched(
-    envelope: EventEnvelope<AiEnrichedEventV1>,
+    envelope: EventEnvelope<AiEnrichedEvent>,
   ): Promise<void> {
     await this.publish(envelope);
   }

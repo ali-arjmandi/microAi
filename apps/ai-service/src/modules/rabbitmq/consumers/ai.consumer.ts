@@ -1,5 +1,5 @@
 import {
-  AiEnrichedEventV1,
+  AiEnrichedEvent,
   AiRejectedEventV1,
   EventEnvelope,
   TransactionCreatedEvent,
@@ -80,7 +80,7 @@ export class AiConsumer {
         return;
       }
 
-      const enrichedEnvelope: EventEnvelope<AiEnrichedEventV1> = {
+      const enrichedEnvelope: EventEnvelope<AiEnrichedEvent> = {
         eventId: randomUUID(),
         eventType: 'ai.enriched',
         occurredAt: new Date().toISOString(),
@@ -88,7 +88,7 @@ export class AiConsumer {
           transactionId: transaction.transactionId,
           summary: enrichment.summary,
           riskNarrative: enrichment.riskNarrative,
-          searchTags: enrichment.searchTags,
+          tags: enrichment.searchTags,
           improvedDescription: enrichment.improvedDescription,
           moderation: enrichment.moderation,
           model,
