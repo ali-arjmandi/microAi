@@ -19,7 +19,7 @@ export class OutboxPublisher {
 
   async publish(event: { eventType: string; payload: unknown }): Promise<void> {
     const version = this.configService.get<string>('RABBITMQ_VERSION');
-    const routingKey = this.mapRoutingKey(event.eventType, version);
+    const routingKey = this.mapRoutingKey(event.eventType);
     const envelope = this.getEnvelope(event.payload);
     const exchangeBase = getTransactionOutboxExchange();
     const exchange = buildVersionedName(exchangeBase, version);
@@ -61,8 +61,8 @@ export class OutboxPublisher {
     });
   }
 
-  private mapRoutingKey(eventType: string, version?: string): string {
-    return normalizeRoutingKey(eventType, version);
+  private mapRoutingKey(eventType: string): string {
+    return normalizeRoutingKey(eventType);
   }
 
   private getEnvelope(payload: unknown): EventEnvelope<unknown> {

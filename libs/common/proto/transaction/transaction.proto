@@ -35,6 +35,9 @@ message GetTransactionResponse {
   string buyer_id = 6;
   string seller_id = 7;
   string state = 8;
+  string ai_status = 9;
+  string search_status = 10;
+  string moderation_status = 11;
 }
 
 message SearchTransactionsRequest {

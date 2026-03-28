@@ -6,7 +6,13 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { TransactionRecord, TransactionState } from '@app/common';
+import {
+  AiProcessingStatus,
+  ModerationStatus,
+  SearchIndexStatus,
+  TransactionRecord,
+  TransactionState,
+} from '@app/common';
 
 export class GetTransactionDto implements TransactionRecord {
   @IsString()
@@ -44,4 +50,13 @@ export class GetTransactionDto implements TransactionRecord {
 
   @IsEnum(TransactionState)
   state: TransactionState;
+
+  @IsEnum(AiProcessingStatus)
+  aiStatus: AiProcessingStatus;
+
+  @IsEnum(SearchIndexStatus)
+  searchStatus: SearchIndexStatus;
+
+  @IsEnum(ModerationStatus)
+  moderationStatus: ModerationStatus;
 }

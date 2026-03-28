@@ -86,6 +86,9 @@ export class ApiGatewayController {
       buyerId: data.buyerId,
       sellerId: data.sellerId,
       state: data.state,
+      aiStatus: data.aiStatus,
+      searchStatus: data.searchStatus,
+      moderationStatus: data.moderationStatus,
     };
   }
 

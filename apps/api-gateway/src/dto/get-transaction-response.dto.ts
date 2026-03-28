@@ -1,5 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { TransactionState } from '@app/common';
+import {
+  AiProcessingStatus,
+  ModerationStatus,
+  SearchIndexStatus,
+  TransactionState,
+} from '@app/common';
 
 export class GetTransactionResponseDto {
   @ApiProperty({ example: 'tx-1709250000000' })
@@ -25,4 +30,19 @@ export class GetTransactionResponseDto {
 
   @ApiProperty({ enum: TransactionState, example: TransactionState.INITIATED })
   state: TransactionState;
+
+  @ApiProperty({
+    enum: AiProcessingStatus,
+    example: AiProcessingStatus.PENDING,
+  })
+  aiStatus: AiProcessingStatus;
+
+  @ApiProperty({ enum: SearchIndexStatus, example: SearchIndexStatus.PENDING })
+  searchStatus: SearchIndexStatus;
+
+  @ApiProperty({
+    enum: ModerationStatus,
+    example: ModerationStatus.PENDING,
+  })
+  moderationStatus: ModerationStatus;
 }
