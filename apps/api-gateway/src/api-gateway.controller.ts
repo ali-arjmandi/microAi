@@ -95,8 +95,25 @@ export class ApiGatewayController {
   private toSearchTransactionsResponse(
     data: CommonSearchTransactionsResponseDto,
   ): SearchTransactionsResponseDto {
+    const rows = this.extractSearchTransactionRows(data as unknown);
     return {
-      items: data.items.map((item) => this.toGetTransactionResponse(item)),
+      items: rows.map((item) => this.toGetTransactionResponse(item)),
     };
+  }
+
+  private extractSearchTransactionRows(
+    payload: unknown,
+  ): CommonGetTransactionDto[] {
+    if (Array.isArray(payload)) {
+      return payload as CommonGetTransactionDto[];
+    }
+    if (payload && typeof payload === 'object') {
+      const record = payload as Record<string, unknown>;
+      const list = record.items ?? record.itemsList;
+      if (Array.isArray(list)) {
+        return list as CommonGetTransactionDto[];
+      }
+    }
+    return [];
   }
 }
