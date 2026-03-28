@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package search;
+
+import "transaction/transaction.proto";
+
+service SearchService {
+  rpc SearchTransactions (transaction.SearchTransactionsRequest) returns (transaction.SearchTransactionsResponse);
+}

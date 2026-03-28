@@ -16,6 +16,9 @@ interface TransactionGrpcService {
   getTransaction(payload: {
     transactionId: string;
   }): Observable<GetTransactionDto>;
+}
+
+interface SearchGrpcService {
   searchTransactions(
     payload: SearchTransactionsQuery,
   ): Observable<SearchTransactionsResponseDto>;
@@ -24,9 +27,11 @@ interface TransactionGrpcService {
 @Injectable()
 export class ApiGatewayService implements OnModuleInit {
   private transactionGrpcService: TransactionGrpcService;
+  private searchGrpcService: SearchGrpcService;
 
   constructor(
     @Inject('TRANSACTION_GRPC') private readonly transactionClient: ClientGrpc,
+    @Inject('SEARCH_GRPC') private readonly searchClient: ClientGrpc,
   ) {}
 
   onModuleInit(): void {
@@ -34,6 +39,8 @@ export class ApiGatewayService implements OnModuleInit {
       this.transactionClient.getService<TransactionGrpcService>(
         'TransactionService',
       );
+    this.searchGrpcService =
+      this.searchClient.getService<SearchGrpcService>('SearchService');
   }
 
   createTransaction(
@@ -53,6 +60,6 @@ export class ApiGatewayService implements OnModuleInit {
   searchTransactions(
     query: SearchTransactionsQuery,
   ): Promise<SearchTransactionsResponseDto> {
-    return lastValueFrom(this.transactionGrpcService.searchTransactions(query));
+    return lastValueFrom(this.searchGrpcService.searchTransactions(query));
   }
 }

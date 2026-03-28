@@ -15,6 +15,8 @@ import { resolve } from 'path';
         PORT: Joi.number().port().default(3000),
         TRANSACTION_SERVICE_HOST: Joi.string().hostname().default('localhost'),
         TRANSACTION_SERVICE_PORT: Joi.number().port().default(50051),
+        SEARCH_SERVICE_HOST: Joi.string().hostname().default('localhost'),
+        SEARCH_SERVICE_GRPC_PORT: Joi.number().port().default(50052),
       }),
     }),
     ClientsModule.registerAsync([
@@ -35,6 +37,31 @@ import { resolve } from 'path';
             )}:${configService.get<number>('TRANSACTION_SERVICE_PORT', 50051)}`,
           },
         }),
+      },
+      {
+        name: 'SEARCH_GRPC',
+        imports: [ConfigModule],
+        inject: [ConfigService],
+        useFactory: (configService: ConfigService) => {
+          const protoRoot = resolve(process.cwd(), 'libs/common/proto');
+          return {
+            transport: Transport.GRPC,
+            options: {
+              package: 'search',
+              protoPath: resolve(protoRoot, 'search/search.proto'),
+              url: `${configService.get<string>(
+                'SEARCH_SERVICE_HOST',
+                'localhost',
+              )}:${configService.get<number>(
+                'SEARCH_SERVICE_GRPC_PORT',
+                50052,
+              )}`,
+              loader: {
+                includeDirs: [protoRoot],
+              },
+            },
+          };
+        },
       },
     ]),
   ],
