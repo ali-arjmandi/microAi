@@ -89,6 +89,15 @@ export class ApiGatewayController {
       aiStatus: data.aiStatus,
       searchStatus: data.searchStatus,
       moderationStatus: data.moderationStatus,
+      summary: data.summary,
+      improvedDescription: data.improvedDescription,
+      riskNarrative: data.riskNarrative,
+      riskScore: data.riskScore,
+      moderationReason: data.moderationReason,
+      moderationConfidence: data.moderationConfidence,
+      searchTags: data.searchTags,
+      aiModelVersion: data.aiModelVersion,
+      aiPromptVersion: data.aiPromptVersion,
     };
   }
 

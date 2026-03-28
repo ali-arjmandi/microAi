@@ -27,4 +27,22 @@ export class GetTransactionDto {
   searchStatus: SearchIndexStatus;
 
   moderationStatus: ModerationStatus;
+
+  summary?: string;
+
+  improvedDescription?: string;
+
+  riskNarrative?: string;
+
+  riskScore?: number;
+
+  moderationReason?: string;
+
+  moderationConfidence?: number;
+
+  searchTags?: string[];
+
+  aiModelVersion?: string;
+
+  aiPromptVersion?: string;
 }

@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   AiProcessingStatus,
   ModerationStatus,
@@ -45,4 +45,57 @@ export class GetTransactionResponseDto {
     example: ModerationStatus.PENDING,
   })
   moderationStatus: ModerationStatus;
+
+  @ApiPropertyOptional({
+    description: 'AI listing summary (after enrichment)',
+    example: 'Sunny 2-bedroom condo near transit',
+  })
+  summary?: string;
+
+  @ApiPropertyOptional({
+    description: 'AI-rewritten listing description',
+  })
+  improvedDescription?: string;
+
+  @ApiPropertyOptional({
+    description: 'Buyer/deal risk narrative from AI (property context)',
+  })
+  riskNarrative?: string;
+
+  @ApiPropertyOptional({
+    description: 'Buyer/deal risk score 0–100 from AI',
+    example: 35,
+  })
+  riskScore?: number;
+
+  @ApiPropertyOptional({
+    description: 'Moderation reason code from AI pipeline',
+    example: 'approved',
+  })
+  moderationReason?: string;
+
+  @ApiPropertyOptional({
+    description: 'AI moderation confidence 0–1',
+    example: 0.92,
+  })
+  moderationConfidence?: number;
+
+  @ApiPropertyOptional({
+    description: 'Lowercase search tags from AI enrichment',
+    type: [String],
+    example: ['austin', 'condo', 'downtown'],
+  })
+  searchTags?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Model identifier used for enrichment',
+    example: 'openrouter/free',
+  })
+  aiModelVersion?: string;
+
+  @ApiPropertyOptional({
+    description: 'Prompt/schema version used for enrichment',
+    example: 'v1',
+  })
+  aiPromptVersion?: string;
 }

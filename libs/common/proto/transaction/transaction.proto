@@ -38,6 +38,15 @@ message GetTransactionResponse {
   string ai_status = 9;
   string search_status = 10;
   string moderation_status = 11;
+  string summary = 12;
+  string improved_description = 13;
+  string risk_narrative = 14;
+  double risk_score = 15;
+  string moderation_reason = 16;
+  double moderation_confidence = 17;
+  repeated string search_tags = 18;
+  string ai_model_version = 19;
+  string ai_prompt_version = 20;
 }
 
 message SearchTransactionsRequest {

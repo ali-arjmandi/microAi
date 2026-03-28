@@ -11,6 +11,7 @@ import {
   TransactionRecord,
   TransactionState,
 } from '@app/common';
+import { TransactionModel } from 'apps/transaction-service/prisma/generated/internal/prismaNamespace';
 import { PrismaService } from '../database/prisma.service';
 import { OutboxRepository } from '../outbox/outbox.repository';
 import { TransactionRepository } from './transaction.repository';
@@ -66,6 +67,24 @@ export class TransactionsService {
       throw new NotFoundException(`Transaction ${transactionId} was not found`);
     }
 
+    return this.toTransactionRecord(transaction);
+  }
+
+  async searchTransactions({
+    query,
+  }: SearchTransactionsQuery): Promise<TransactionRecord[]> {
+    const transactions = await this.transactionRepository.search(query);
+    return transactions.map((item) => this.toTransactionRecord(item));
+  }
+
+  private toTransactionRecord(
+    transaction: TransactionModel,
+  ): TransactionRecord {
+    const tags = transaction.searchTags;
+    const searchTags = Array.isArray(tags)
+      ? tags.filter((t): t is string => typeof t === 'string')
+      : undefined;
+
     return {
       transactionId: transaction.id,
       title: transaction.title,
@@ -78,25 +97,22 @@ export class TransactionsService {
       aiStatus: transaction.aiStatus as AiProcessingStatus,
       searchStatus: transaction.searchStatus as SearchIndexStatus,
       moderationStatus: transaction.moderationStatus as ModerationStatus,
+      summary: transaction.summary ?? undefined,
+      improvedDescription: transaction.improvedDescription ?? undefined,
+      riskNarrative: transaction.riskNarrative ?? undefined,
+      riskScore:
+        transaction.riskScore !== null && transaction.riskScore !== undefined
+          ? Number(transaction.riskScore)
+          : undefined,
+      moderationReason: transaction.moderationReason ?? undefined,
+      moderationConfidence:
+        transaction.moderationConfidence !== null &&
+        transaction.moderationConfidence !== undefined
+          ? Number(transaction.moderationConfidence)
+          : undefined,
+      searchTags,
+      aiModelVersion: transaction.aiModelVersion ?? undefined,
+      aiPromptVersion: transaction.aiPromptVersion ?? undefined,
     };
-  }
-
-  async searchTransactions({
-    query,
-  }: SearchTransactionsQuery): Promise<TransactionRecord[]> {
-    const transactions = await this.transactionRepository.search(query);
-    return transactions.map((item) => ({
-      transactionId: item.id,
-      title: item.title,
-      description: item.description ?? '',
-      propertyAddress: item.propertyAddress,
-      price: Number(item.price),
-      buyerId: item.buyerId,
-      sellerId: item.sellerId,
-      state: item.state as TransactionState,
-      aiStatus: item.aiStatus as AiProcessingStatus,
-      searchStatus: item.searchStatus as SearchIndexStatus,
-      moderationStatus: item.moderationStatus as ModerationStatus,
-    }));
   }
 }
