@@ -9,7 +9,12 @@ import {
   TransactionClient,
   TransactionModel,
 } from 'apps/transaction-service/prisma/generated/internal/prismaNamespace';
-import { TransactionState } from 'apps/transaction-service/prisma/generated/enums';
+import {
+  AiProcessingStatus,
+  ModerationStatus,
+  SearchIndexStatus,
+  TransactionState,
+} from 'apps/transaction-service/prisma/generated/enums';
 import { Prisma } from 'apps/transaction-service/prisma/generated/client';
 
 @Injectable()
@@ -116,5 +121,65 @@ export class TransactionRepository {
     throw new ConflictException(
       `Optimistic lock conflict for transaction ${transactionId}. Expected version ${expectedVersion}, current version ${current.version}.`,
     );
+  }
+
+  applySearchIndexUpdated(
+    transactionId: string,
+    sourceEventType: string,
+    tx?: TransactionClient,
+  ): Promise<TransactionModel> {
+    const client = tx ?? this.prisma;
+    const normalized = sourceEventType.trim().replace(/\.v\d+$/u, '');
+
+    if (
+      normalized === 'transaction.created' ||
+      normalized === 'transaction.updated'
+    ) {
+      return client.transaction.update({
+        where: { id: transactionId },
+        data: {
+          searchStatus: SearchIndexStatus.INDEXED_BASE,
+          state: TransactionState.AI_PROCESSING,
+          version: { increment: 1 },
+        },
+      });
+    }
+
+    if (normalized === 'ai.enriched') {
+      return client.transaction.update({
+        where: { id: transactionId },
+        data: {
+          searchStatus: SearchIndexStatus.INDEXED_ENRICHED,
+          state: TransactionState.READY,
+          aiStatus: AiProcessingStatus.COMPLETED,
+          moderationStatus: ModerationStatus.ALLOW,
+          version: { increment: 1 },
+        },
+      });
+    }
+
+    throw new Error(
+      `Unsupported search.index.updated sourceEventType="${sourceEventType}"`,
+    );
+  }
+
+  applySearchIndexRejected(
+    transactionId: string,
+    reason: string | undefined,
+    tx?: TransactionClient,
+  ): Promise<TransactionModel> {
+    const client = tx ?? this.prisma;
+
+    return client.transaction.update({
+      where: { id: transactionId },
+      data: {
+        searchStatus: SearchIndexStatus.FAILED,
+        state: TransactionState.REJECTED_MODERATION,
+        aiStatus: AiProcessingStatus.FAILED,
+        moderationStatus: ModerationStatus.REJECT,
+        moderationReason: reason?.trim() || null,
+        version: { increment: 1 },
+      },
+    });
   }
 }

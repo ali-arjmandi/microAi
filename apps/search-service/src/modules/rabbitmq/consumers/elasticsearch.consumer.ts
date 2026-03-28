@@ -226,7 +226,10 @@ export class ElasticsearchConsumer {
         existingDocument?.moderationReason,
       );
     } else {
-      await this.publishStatusUpdated(envelope, transactionPayload.transactionId);
+      await this.publishStatusUpdated(
+        envelope,
+        transactionPayload.transactionId,
+      );
     }
   }
 

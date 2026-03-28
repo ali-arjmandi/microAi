@@ -1,11 +1,11 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TransactionRepository } from './transaction.repository';
 import { TransactionsService } from './transactions.service';
 import { OutboxModule } from '../outbox/outbox.module';
 
 @Module({
-  imports: [OutboxModule],
+  imports: [forwardRef(() => OutboxModule)],
   providers: [TransactionsService, TransactionRepository],
-  exports: [TransactionsService],
+  exports: [TransactionsService, TransactionRepository],
 })
 export class TransactionsModule {}

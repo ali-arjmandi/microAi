@@ -1,0 +1,183 @@
+import {
+  EventEnvelope,
+  SearchIndexRejectedEventV1,
+  SearchIndexUpdatedEventV1,
+} from '@app/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { PrismaClientKnownRequestError } from 'apps/transaction-service/prisma/generated/internal/prismaNamespace';
+import { TransactionRepository } from 'apps/transaction-service/src/modules/transactions/transaction.repository';
+
+@Injectable()
+export class TransactionConsumer {
+  private readonly logger = new Logger(TransactionConsumer.name);
+  private readonly processedEventIds = new Set<string>();
+  private readonly processedEventQueue: string[] = [];
+  private readonly maxTrackedEventIds = 10_000;
+
+  constructor(private readonly transactionRepository: TransactionRepository) {}
+
+  async handleMessage(payload: unknown): Promise<void> {
+    let envelope: EventEnvelope<unknown>;
+
+    try {
+      envelope = this.getEnvelope(payload);
+    } catch (error) {
+      this.logger.warn(
+        `Skipping malformed search outcome message: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      return;
+    }
+
+    if (this.isDuplicateEvent(envelope.eventId)) {
+      this.logger.debug(
+        `Skipping duplicate search outcome eventId="${envelope.eventId}" eventType="${envelope.eventType}"`,
+      );
+      return;
+    }
+
+    const normalizedEventType = this.normalizeEventType(envelope.eventType);
+
+    if (normalizedEventType === 'search.index.updated') {
+      await this.handleSearchIndexUpdated(envelope);
+      return;
+    }
+
+    if (normalizedEventType === 'search.index.rejected') {
+      await this.handleSearchIndexRejected(envelope);
+      return;
+    }
+
+    this.logger.debug(
+      `Ignoring non-search-outcome eventType="${envelope.eventType}" eventId="${envelope.eventId}"`,
+    );
+  }
+
+  private getEnvelope(payload: unknown): EventEnvelope<unknown> {
+    if (!payload || typeof payload !== 'object') {
+      throw new Error('Message payload must be an event envelope object');
+    }
+
+    const maybeEnvelope = payload as Partial<EventEnvelope<unknown>>;
+    if (
+      typeof maybeEnvelope.eventId !== 'string' ||
+      typeof maybeEnvelope.eventType !== 'string'
+    ) {
+      throw new Error(
+        'Message envelope is missing required fields: eventId/eventType',
+      );
+    }
+
+    return maybeEnvelope as EventEnvelope<unknown>;
+  }
+
+  private isDuplicateEvent(eventId: string): boolean {
+    if (this.processedEventIds.has(eventId)) {
+      return true;
+    }
+
+    this.processedEventIds.add(eventId);
+    this.processedEventQueue.push(eventId);
+
+    if (this.processedEventQueue.length > this.maxTrackedEventIds) {
+      const evictedId = this.processedEventQueue.shift();
+      if (evictedId) {
+        this.processedEventIds.delete(evictedId);
+      }
+    }
+
+    return false;
+  }
+
+  private normalizeEventType(eventType: string): string {
+    return eventType.trim().replace(/\.v\d+$/u, '');
+  }
+
+  private async handleSearchIndexUpdated(
+    envelope: EventEnvelope<unknown>,
+  ): Promise<void> {
+    const payload = envelope.payload as Partial<SearchIndexUpdatedEventV1>;
+    if (!payload || typeof payload.transactionId !== 'string') {
+      this.logger.warn(
+        `Skipping search.index.updated with missing transactionId eventId="${envelope.eventId}"`,
+      );
+      return;
+    }
+
+    if (payload.searchStatus !== 'UPDATED') {
+      this.logger.warn(
+        `Skipping search.index.updated with unexpected searchStatus eventId="${envelope.eventId}"`,
+      );
+      return;
+    }
+
+    if (typeof payload.sourceEventType !== 'string') {
+      this.logger.warn(
+        `Skipping search.index.updated with missing sourceEventType eventId="${envelope.eventId}"`,
+      );
+      return;
+    }
+
+    try {
+      await this.transactionRepository.applySearchIndexUpdated(
+        payload.transactionId,
+        payload.sourceEventType,
+      );
+    } catch (error) {
+      if (this.isRecordNotFoundError(error)) {
+        this.logger.warn(
+          `No transaction for search.index.updated transactionId="${payload.transactionId}" eventId="${envelope.eventId}"`,
+        );
+        return;
+      }
+      if (error instanceof Error && error.message.includes('Unsupported')) {
+        this.logger.warn(
+          `Unsupported search.index.updated source eventId="${envelope.eventId}" sourceEventType="${payload.sourceEventType}"`,
+        );
+        return;
+      }
+      throw error;
+    }
+  }
+
+  private async handleSearchIndexRejected(
+    envelope: EventEnvelope<unknown>,
+  ): Promise<void> {
+    const payload = envelope.payload as Partial<SearchIndexRejectedEventV1>;
+    if (!payload || typeof payload.transactionId !== 'string') {
+      this.logger.warn(
+        `Skipping search.index.rejected with missing transactionId eventId="${envelope.eventId}"`,
+      );
+      return;
+    }
+
+    if (payload.searchStatus !== 'REJECTED') {
+      this.logger.warn(
+        `Skipping search.index.rejected with unexpected searchStatus eventId="${envelope.eventId}"`,
+      );
+      return;
+    }
+
+    try {
+      await this.transactionRepository.applySearchIndexRejected(
+        payload.transactionId,
+        payload.reason,
+      );
+    } catch (error) {
+      if (this.isRecordNotFoundError(error)) {
+        this.logger.warn(
+          `No transaction for search.index.rejected transactionId="${payload.transactionId}" eventId="${envelope.eventId}"`,
+        );
+        return;
+      }
+      throw error;
+    }
+  }
+
+  private isRecordNotFoundError(error: unknown): boolean {
+    return (
+      error instanceof PrismaClientKnownRequestError && error.code === 'P2025'
+    );
+  }
+}

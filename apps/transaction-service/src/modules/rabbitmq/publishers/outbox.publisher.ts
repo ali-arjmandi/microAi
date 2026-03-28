@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEnvelope } from '@app/common';
-import { RabbitMqConnectionService } from '../rabbitmq/rabbitmq.connection.service';
+import { RabbitMqConnectionService } from '../rabbitmq.connection.service';
 import {
   buildVersionedName,
   getTransactionOutboxExchange,
   normalizeRoutingKey,
-} from '../rabbitmq/rabbitmq.config';
+} from '../rabbitmq.config';
 
 @Injectable()
 export class OutboxPublisher {

@@ -1,8 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import {
+  AiProcessingStatus,
   CreateTransactionPayload,
   EventEnvelope,
+  ModerationStatus,
+  SearchIndexStatus,
   SearchTransactionsQuery,
   TransactionCreatedEvent,
   TransactionRecord,
@@ -72,6 +75,9 @@ export class TransactionsService {
       buyerId: transaction.buyerId,
       sellerId: transaction.sellerId,
       state: transaction.state as TransactionState,
+      aiStatus: transaction.aiStatus as AiProcessingStatus,
+      searchStatus: transaction.searchStatus as SearchIndexStatus,
+      moderationStatus: transaction.moderationStatus as ModerationStatus,
     };
   }
 
@@ -88,6 +94,9 @@ export class TransactionsService {
       buyerId: item.buyerId,
       sellerId: item.sellerId,
       state: item.state as TransactionState,
+      aiStatus: item.aiStatus as AiProcessingStatus,
+      searchStatus: item.searchStatus as SearchIndexStatus,
+      moderationStatus: item.moderationStatus as ModerationStatus,
     }));
   }
 }

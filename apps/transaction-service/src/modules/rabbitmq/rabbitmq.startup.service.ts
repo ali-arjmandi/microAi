@@ -6,7 +6,7 @@ import {
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ConsumeMessage } from 'amqplib';
-import { SearchOutcomeConsumer } from './consumers/search-outcome.consumer';
+import { TransactionConsumer } from './consumers/transaction.consumer';
 import { RabbitMqConnectionService } from './rabbitmq.connection.service';
 import {
   getTransactionQueueInboundBindingTargets,
@@ -22,7 +22,7 @@ export class RabbitMqStartupService {
   constructor(
     private readonly connectionService: RabbitMqConnectionService,
     private readonly configService: ConfigService,
-    private readonly searchOutcomeConsumer: SearchOutcomeConsumer,
+    private readonly searchOutcomeConsumer: TransactionConsumer,
   ) {}
 
   async initialize(): Promise<void> {

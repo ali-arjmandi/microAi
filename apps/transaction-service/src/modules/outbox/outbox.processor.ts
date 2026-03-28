@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { OutboxPublisher } from './outbox.publisher';
+import { OutboxPublisher } from '../rabbitmq/publishers/outbox.publisher';
 import { OutboxRepository } from './outbox.repository';
 
 @Injectable()
