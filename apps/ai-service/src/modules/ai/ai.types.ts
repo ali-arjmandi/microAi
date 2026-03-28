@@ -14,9 +14,11 @@ export interface AiModerationResult {
 
 export interface AiEnrichmentResult {
   summary: string;
+  /** Buyer / transaction risk for this property listing (information quality, deal red flags)—not unrelated risk. */
   riskNarrative: string;
   searchTags: string[];
   improvedDescription: string;
+  /** 0 = low buyer-deal risk; 100 = high—real-estate purchase context only. */
   riskScore: number;
   moderation: AiModerationResult;
 }

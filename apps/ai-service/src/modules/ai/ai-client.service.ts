@@ -29,18 +29,24 @@ export class AiClientService {
   ): Promise<AiEnrichmentResult> {
     const systemPrompt = [
       'You are the AI layer for a real-estate (property) marketplace: homes, land, commercial buildings, leases, and rentals.',
-      'Your job is to (1) decide if the submission is genuinely about real property, then (2) if allowed, enrich it for search and trust.',
-      'Reject (moderation.status REJECT) when the listing is clearly not real estate: vehicles, car/motorcycle/boat sales, electronics, jobs, services, or generic goods. Use a short machine-friendly reason code in moderation.reason, e.g. not_real_estate_listing, wrong_category_vehicle, wrong_category_goods.',
-      'Use REVIEW only when unsure whether it is property-related (e.g. vague text).',
+      'Moderation order: (1) Policy/safety first, (2) then whether the post is a genuine property listing.',
+      'Always REJECT (moderation.status REJECT) when the content is sexual, pornographic, soliciting adult or escort services, fetish or dating hooks, graphic innuendo aimed at users, or otherwise inappropriate for a family-safe property marketplace—even if real estate words appear. Use reason codes such as inappropriate_sexual_content, policy_adult_services, or policy_inappropriate_content.',
+      'REJECT when the listing is clearly not real estate: vehicles, boats, electronics, jobs, unrelated services, or generic goods. Use codes like not_real_estate_listing, wrong_category_vehicle, wrong_category_goods.',
+      'Use REVIEW only when property-related but materially unclear (e.g. very vague text) and not a policy violation.',
       'If you REJECT or REVIEW, you must still return every key below with sensible strings/arrays (placeholders are fine for enrichment fields).',
       'Output strict JSON only — no markdown, no code fences.',
-      'Keys: summary (string), riskNarrative (string), searchTags (string[]), improvedDescription (string), riskScore (number 0..100, higher means more risk/uncertainty for the listing), moderation { status: ALLOW|REJECT|REVIEW, reason (string), confidence number 0..1 }.',
+      'riskNarrative and riskScore apply ONLY when the submission is a real-estate listing context. They describe transaction/purchase risk for a buyer from a property-deal perspective (e.g. missing key facts, vague address or specs, price vs plausible market, unclear tenure or rental terms, signals of misrepresentation)—NOT personal, unrelated, or non-property risk.',
+      'riskScore: number 0..100 where higher means more buyer/deal risk (information gaps, red flags, weak verifiability). Use low scores only when the listing is coherent, property-focused, and adequately described for a typical listing.',
+      'riskNarrative: short plain-language summary of those real-estate buyer/deal risks only. If you REJECT for non-property or policy reasons, still return a brief neutral placeholder risk narrative (e.g. "Not assessed: listing rejected before property risk review.").',
+      'Keys: summary (string), riskNarrative (string), searchTags (string[]), improvedDescription (string), riskScore (number 0..100), moderation { status: ALLOW|REJECT|REVIEW, reason (non-empty snake_case code), confidence number 0..1 }.',
+      'moderation.reason must NEVER be empty or whitespace: use approved when ALLOW, needs_review when REVIEW, and a specific code when REJECT.',
       'searchTags: lowercase tokens useful for property search (state, neighborhood cues, property type). If REJECT, searchTags can be empty [].',
     ].join('\n');
 
     const userPrompt = [
       'Evaluate and enrich this submission using ONLY the provided fields. Do not invent addresses or parties.',
-      'If it is not a real-estate listing, set moderation.status to REJECT and do not write marketing copy as if it were property.',
+      'If content violates safe-marketplace policy (including sexual or adult-oriented material) or is not a genuine real-estate listing, set moderation.status to REJECT with the appropriate reason code. Do not write marketing copy as if it were a property.',
+      'When ALLOW, summary and improvedDescription are property-appropriate; riskNarrative and riskScore reflect real-estate buyer/deal risk only.',
       'Input JSON:',
       JSON.stringify(listing),
       'Return a single JSON object matching the schema from the system message.',
