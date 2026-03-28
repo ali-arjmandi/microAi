@@ -7,6 +7,7 @@ describe('parseValidAiEnrichmentOutput', () => {
     riskNarrative: 'r',
     searchTags: ['a'],
     improvedDescription: 'd',
+    riskScore: 25,
     moderation: {
       status: 'ALLOW' as const,
       reason: 'ok',

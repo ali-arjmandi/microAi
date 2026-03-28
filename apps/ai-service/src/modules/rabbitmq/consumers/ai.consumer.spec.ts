@@ -16,6 +16,7 @@ describe('AiConsumer', () => {
     riskNarrative: 'r',
     searchTags: ['tag'],
     improvedDescription: 'd',
+    riskScore: 12,
     moderation: {
       status: 'ALLOW' as const,
       reason: 'ok',

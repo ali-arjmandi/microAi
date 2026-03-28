@@ -17,5 +17,6 @@ export interface AiEnrichmentResult {
   riskNarrative: string;
   searchTags: string[];
   improvedDescription: string;
+  riskScore: number;
   moderation: AiModerationResult;
 }

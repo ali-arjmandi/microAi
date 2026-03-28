@@ -1,4 +1,8 @@
-import { EventEnvelope } from '@app/common';
+import {
+  EventEnvelope,
+  SearchIndexUpdatedEnrichmentV1,
+  SearchIndexUpdatedEventV1,
+} from '@app/common';
 import { Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { IndexingService } from '../../elasticsearch/elasticsearch.indexing.service';
@@ -26,7 +30,15 @@ interface AiEnrichedPayload {
   summary?: string;
   improvedDescription?: string;
   riskNarrative?: string;
+  riskScore?: number;
   tags?: string[];
+  moderation?: {
+    status?: string;
+    reason?: string;
+    confidence?: number;
+  };
+  model?: string;
+  promptVersion?: string;
 }
 
 interface AiRejectedPayload {
@@ -306,7 +318,21 @@ export class ElasticsearchConsumer {
     });
 
     if (hasBaseTransactionData) {
-      await this.publishStatusUpdated(envelope, payload.transactionId);
+      const enrichment = this.tryBuildSearchIndexEnrichment(payload);
+      if (!enrichment) {
+        this.logger.warn(
+          JSON.stringify({
+            msg: 'search.index.updated missing valid enrichment snapshot; Postgres AI columns may stay empty',
+            transactionId: payload.transactionId,
+            eventId: envelope.eventId,
+          }),
+        );
+      }
+      await this.publishStatusUpdated(
+        envelope,
+        payload.transactionId,
+        enrichment,
+      );
     }
   }
 
@@ -411,15 +437,85 @@ export class ElasticsearchConsumer {
     return doc?.moderationStatus?.trim().toUpperCase() === 'REJECT';
   }
 
+  private tryBuildSearchIndexEnrichment(
+    payload: AiEnrichedPayload,
+  ): SearchIndexUpdatedEnrichmentV1 | undefined {
+    if (typeof payload.summary !== 'string' || !payload.summary.trim()) {
+      return undefined;
+    }
+    if (typeof payload.riskNarrative !== 'string' || !payload.riskNarrative.trim()) {
+      return undefined;
+    }
+    if (
+      typeof payload.improvedDescription !== 'string' ||
+      !payload.improvedDescription.trim()
+    ) {
+      return undefined;
+    }
+    if (
+      typeof payload.riskScore !== 'number' ||
+      Number.isNaN(payload.riskScore) ||
+      payload.riskScore < 0 ||
+      payload.riskScore > 100
+    ) {
+      return undefined;
+    }
+    if (typeof payload.model !== 'string' || !payload.model.trim()) {
+      return undefined;
+    }
+    if (typeof payload.promptVersion !== 'string' || !payload.promptVersion.trim()) {
+      return undefined;
+    }
+    const mod = payload.moderation;
+    if (!mod || typeof mod !== 'object') {
+      return undefined;
+    }
+    const status = mod.status?.trim().toUpperCase();
+    if (status !== 'ALLOW' && status !== 'REJECT' && status !== 'REVIEW') {
+      return undefined;
+    }
+    if (typeof mod.reason !== 'string') {
+      return undefined;
+    }
+    if (
+      typeof mod.confidence !== 'number' ||
+      Number.isNaN(mod.confidence) ||
+      mod.confidence < 0 ||
+      mod.confidence > 1
+    ) {
+      return undefined;
+    }
+    const tags = Array.isArray(payload.tags)
+      ? payload.tags.filter((t): t is string => typeof t === 'string' && t.trim().length > 0)
+      : [];
+
+    return {
+      summary: payload.summary.trim(),
+      riskNarrative: payload.riskNarrative.trim(),
+      improvedDescription: payload.improvedDescription.trim(),
+      riskScore: payload.riskScore,
+      tags,
+      moderation: {
+        status: status as 'ALLOW' | 'REJECT' | 'REVIEW',
+        reason: mod.reason.trim(),
+        confidence: mod.confidence,
+      },
+      model: payload.model.trim(),
+      promptVersion: payload.promptVersion.trim(),
+    };
+  }
+
   private async publishStatusUpdated(
     sourceEnvelope: EventEnvelope<unknown>,
     transactionId: string,
+    enrichment?: SearchIndexUpdatedEnrichmentV1,
   ): Promise<void> {
-    const payload: SearchStatusUpdatedPayload = {
+    const payload: SearchIndexUpdatedEventV1 = {
       transactionId,
       searchStatus: 'UPDATED',
       sourceEventId: sourceEnvelope.eventId,
       sourceEventType: sourceEnvelope.eventType,
+      ...(enrichment ? { enrichment } : {}),
     };
 
     await this.searchEventPublisher.publish({

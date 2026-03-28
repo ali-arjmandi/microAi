@@ -13,6 +13,7 @@ export const aiEnrichmentOutputSchema = Joi.object({
   riskNarrative: Joi.string().required(),
   searchTags: Joi.array().items(Joi.string().min(1)).required(),
   improvedDescription: Joi.string().required(),
+  riskScore: Joi.number().min(0).max(100).required(),
   moderation: moderationSchema.required(),
 }).strict();
 
@@ -39,6 +40,7 @@ export function parseValidAiEnrichmentOutput(
     riskNarrative: v.riskNarrative,
     searchTags: v.searchTags,
     improvedDescription: v.improvedDescription,
+    riskScore: v.riskScore,
     moderation: {
       status: v.moderation.status,
       reason: v.moderation.reason,

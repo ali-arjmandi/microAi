@@ -12,6 +12,7 @@ export interface AiEnrichedEvent {
   riskNarrative: string;
   tags: string[];
   improvedDescription: string;
+  riskScore: number;
   moderation: AiModerationResult;
   model: string;
   promptVersion: string;

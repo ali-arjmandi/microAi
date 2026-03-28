@@ -44,11 +44,27 @@ describe('TransactionConsumer', () => {
     expect(repository.applySearchIndexUpdated).toHaveBeenCalledWith(
       'tx-1',
       'transaction.created',
+      undefined,
     );
     expect(repository.applySearchIndexRejected).not.toHaveBeenCalled();
   });
 
-  it('applies enriched index outcome from ai.enriched', async () => {
+  it('applies enriched index outcome from ai.enriched with enrichment snapshot', async () => {
+    const enrichment = {
+      summary: 'S',
+      riskNarrative: 'R',
+      improvedDescription: 'D',
+      riskScore: 33,
+      tags: ['t1'],
+      moderation: {
+        status: 'ALLOW' as const,
+        reason: 'ok',
+        confidence: 0.8,
+      },
+      model: 'm1',
+      promptVersion: 'v1',
+    };
+
     await consumer.handleMessage({
       eventId: 'e2',
       eventType: 'search.index.updated',
@@ -58,12 +74,50 @@ describe('TransactionConsumer', () => {
         searchStatus: 'UPDATED',
         sourceEventId: 'src',
         sourceEventType: 'ai.enriched',
+        enrichment,
       },
     });
 
     expect(repository.applySearchIndexUpdated).toHaveBeenCalledWith(
       'tx-2',
       'ai.enriched',
+      enrichment,
+    );
+  });
+
+  it('strips enrichment when source is not ai.enriched', async () => {
+    const enrichment = {
+      summary: 'S',
+      riskNarrative: 'R',
+      improvedDescription: 'D',
+      riskScore: 1,
+      tags: [] as string[],
+      moderation: {
+        status: 'ALLOW' as const,
+        reason: 'ok',
+        confidence: 0.5,
+      },
+      model: 'm',
+      promptVersion: 'v1',
+    };
+
+    await consumer.handleMessage({
+      eventId: 'e-strip',
+      eventType: 'search.index.updated',
+      occurredAt: new Date().toISOString(),
+      payload: {
+        transactionId: 'tx-strip',
+        searchStatus: 'UPDATED',
+        sourceEventId: 'src',
+        sourceEventType: 'transaction.created',
+        enrichment,
+      },
+    });
+
+    expect(repository.applySearchIndexUpdated).toHaveBeenCalledWith(
+      'tx-strip',
+      'transaction.created',
+      undefined,
     );
   });
 

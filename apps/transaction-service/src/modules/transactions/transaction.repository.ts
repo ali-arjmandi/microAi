@@ -3,7 +3,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateTransactionPayload } from '@app/common';
+import {
+  CreateTransactionPayload,
+  SearchIndexUpdatedEnrichmentV1,
+} from '@app/common';
 import { PrismaService } from 'apps/transaction-service/src/modules/database/prisma.service';
 import {
   TransactionClient,
@@ -126,6 +129,7 @@ export class TransactionRepository {
   applySearchIndexUpdated(
     transactionId: string,
     sourceEventType: string,
+    enrichment?: SearchIndexUpdatedEnrichmentV1,
     tx?: TransactionClient,
   ): Promise<TransactionModel> {
     const client = tx ?? this.prisma;
@@ -146,14 +150,41 @@ export class TransactionRepository {
     }
 
     if (normalized === 'ai.enriched') {
+      const base = {
+        searchStatus: SearchIndexStatus.INDEXED_ENRICHED,
+        state: TransactionState.READY,
+        aiStatus: AiProcessingStatus.COMPLETED,
+        version: { increment: 1 },
+      } as const;
+
+      if (enrichment) {
+        return client.transaction.update({
+          where: { id: transactionId },
+          data: {
+            ...base,
+            summary: enrichment.summary,
+            improvedDescription: enrichment.improvedDescription,
+            riskNarrative: enrichment.riskNarrative,
+            riskScore: new Prisma.Decimal(enrichment.riskScore),
+            searchTags: enrichment.tags,
+            aiModelVersion: enrichment.model,
+            aiPromptVersion: enrichment.promptVersion,
+            moderationStatus: this.mapAiModerationStatus(
+              enrichment.moderation.status,
+            ),
+            moderationReason: enrichment.moderation.reason,
+            moderationConfidence: new Prisma.Decimal(
+              enrichment.moderation.confidence,
+            ),
+          },
+        });
+      }
+
       return client.transaction.update({
         where: { id: transactionId },
         data: {
-          searchStatus: SearchIndexStatus.INDEXED_ENRICHED,
-          state: TransactionState.READY,
-          aiStatus: AiProcessingStatus.COMPLETED,
+          ...base,
           moderationStatus: ModerationStatus.ALLOW,
-          version: { increment: 1 },
         },
       });
     }
@@ -161,6 +192,18 @@ export class TransactionRepository {
     throw new Error(
       `Unsupported search.index.updated sourceEventType="${sourceEventType}"`,
     );
+  }
+
+  private mapAiModerationStatus(
+    status: SearchIndexUpdatedEnrichmentV1['moderation']['status'],
+  ): ModerationStatus {
+    if (status === 'ALLOW') {
+      return ModerationStatus.ALLOW;
+    }
+    if (status === 'REVIEW') {
+      return ModerationStatus.REVIEW;
+    }
+    return ModerationStatus.REJECT;
   }
 
   applySearchIndexRejected(

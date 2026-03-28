@@ -5,6 +5,7 @@ describe('TransactionRepository', () => {
     transaction: {
       create: jest.fn(),
       findMany: jest.fn(),
+      update: jest.fn(),
     },
   };
 
@@ -50,6 +51,46 @@ describe('TransactionRepository', () => {
             { propertyAddress: { contains: 'balcony', mode: 'insensitive' } },
           ]),
         },
+      }),
+    );
+  });
+
+  it('persists AI enrichment fields when applying search outcome from ai.enriched', async () => {
+    prismaMock.transaction.update.mockResolvedValue({ id: 'tx-ai' });
+
+    const enrichment = {
+      summary: 'Sum',
+      riskNarrative: 'Risk text',
+      improvedDescription: 'Better',
+      riskScore: 55,
+      tags: ['x', 'y'],
+      moderation: {
+        status: 'REVIEW' as const,
+        reason: 'unsure',
+        confidence: 0.4,
+      },
+      model: 'gpt',
+      promptVersion: 'v2',
+    };
+
+    await repository.applySearchIndexUpdated(
+      'tx-ai',
+      'ai.enriched',
+      enrichment,
+    );
+
+    expect(prismaMock.transaction.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'tx-ai' },
+        data: expect.objectContaining({
+          summary: 'Sum',
+          riskNarrative: 'Risk text',
+          improvedDescription: 'Better',
+          searchTags: ['x', 'y'],
+          aiModelVersion: 'gpt',
+          aiPromptVersion: 'v2',
+          moderationReason: 'unsure',
+        }),
       }),
     );
   });

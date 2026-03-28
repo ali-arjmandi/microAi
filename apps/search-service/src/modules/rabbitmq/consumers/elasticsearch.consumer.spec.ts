@@ -213,4 +213,50 @@ describe('ElasticsearchConsumer', () => {
       expect.objectContaining({ eventType: 'search.index.updated' }),
     );
   });
+
+  it('publishes search.index.updated with enrichment when ai.enriched and base data exists', async () => {
+    indexingServiceMock.getDocument.mockResolvedValueOnce({
+      transactionId: 'tx-enr',
+      title: 'Has base',
+    });
+
+    await consumer.handleMessage({
+      eventId: 'evt-ai-full',
+      eventType: 'ai.enriched',
+      occurredAt: '2026-03-27T00:00:00.000Z',
+      payload: {
+        transactionId: 'tx-enr',
+        summary: 'S',
+        riskNarrative: 'R',
+        improvedDescription: 'D',
+        riskScore: 42,
+        tags: ['a', 'b'],
+        moderation: { status: 'ALLOW', reason: 'ok', confidence: 0.9 },
+        model: 'test-model',
+        promptVersion: 'v1',
+      },
+    });
+
+    expect(publisherMock.publish).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'search.index.updated',
+        payload: expect.objectContaining({
+          transactionId: 'tx-enr',
+          searchStatus: 'UPDATED',
+          enrichment: expect.objectContaining({
+            summary: 'S',
+            riskScore: 42,
+            tags: ['a', 'b'],
+            model: 'test-model',
+            promptVersion: 'v1',
+            moderation: expect.objectContaining({
+              status: 'ALLOW',
+              reason: 'ok',
+              confidence: 0.9,
+            }),
+          }),
+        }),
+      }),
+    );
+  });
 });

@@ -34,7 +34,7 @@ export class AiClientService {
       'Use REVIEW only when unsure whether it is property-related (e.g. vague text).',
       'If you REJECT or REVIEW, you must still return every key below with sensible strings/arrays (placeholders are fine for enrichment fields).',
       'Output strict JSON only — no markdown, no code fences.',
-      'Keys: summary (string), riskNarrative (string), searchTags (string[]), improvedDescription (string), moderation { status: ALLOW|REJECT|REVIEW, reason (string), confidence number 0..1 }.',
+      'Keys: summary (string), riskNarrative (string), searchTags (string[]), improvedDescription (string), riskScore (number 0..100, higher means more risk/uncertainty for the listing), moderation { status: ALLOW|REJECT|REVIEW, reason (string), confidence number 0..1 }.',
       'searchTags: lowercase tokens useful for property search (state, neighborhood cues, property type). If REJECT, searchTags can be empty [].',
     ].join('\n');
 

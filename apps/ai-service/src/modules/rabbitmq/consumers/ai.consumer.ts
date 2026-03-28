@@ -103,6 +103,7 @@ export class AiConsumer {
             riskNarrative: enrichment.riskNarrative,
             tags: enrichment.searchTags,
             improvedDescription: enrichment.improvedDescription,
+            riskScore: enrichment.riskScore,
             moderation: enrichment.moderation,
             model,
             promptVersion,
