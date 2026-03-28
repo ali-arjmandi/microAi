@@ -1,14 +1,18 @@
+import {
+  assertResolvedTopicBindings,
+  buildVersionedName,
+  resolveRabbitMqPrefetch,
+} from '@app/common';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { RabbitMqConnectionService } from './rabbitmq.connection.service';
 import { ConsumeMessage } from 'amqplib';
 import { ElasticsearchConsumer } from './consumers/elasticsearch.consumer';
+import { RabbitMqConnectionService } from './rabbitmq.connection.service';
 import {
-  buildVersionedName,
   getSearchEventsExchange,
-  getSearchQueueName,
   getSearchQueueBindingTargets,
-  normalizeRoutingKey,
+  getSearchQueueInboundBindingTargets,
+  getSearchQueueName,
 } from './rabbitmq.config';
 
 @Injectable()
@@ -28,7 +32,8 @@ export class RabbitMqStartupService {
       version,
     );
     const queueName = buildVersionedName(getSearchQueueName(), version);
-    const bindingTargets = getSearchQueueBindingTargets();
+    const outboundBindingTargets = getSearchQueueBindingTargets();
+    const inboundBindingTargets = getSearchQueueInboundBindingTargets();
 
     try {
       if (!searchEventsExchangeName && !queueName) {
@@ -40,7 +45,7 @@ export class RabbitMqStartupService {
 
       await this.connectionService.connect();
       const channel = this.connectionService.getChannel();
-      const prefetch = Number(
+      const prefetch = resolveRabbitMqPrefetch(
         this.configService.get<number>('RABBITMQ_PREFETCH'),
       );
 
@@ -54,35 +59,20 @@ export class RabbitMqStartupService {
         });
       }
 
-      if (queueName && bindingTargets.length > 0) {
-        for (const binding of bindingTargets) {
-          const bindingExchangeName = buildVersionedName(
-            binding.exchangeName,
-            version,
-          );
-          const targetQueueName = buildVersionedName(binding.queueName, version);
-          const routingKey = normalizeRoutingKey(binding.routingKey, version);
-          if (!bindingExchangeName || !targetQueueName) {
-            continue;
-          }
+      const allBindingTargets = [
+        ...outboundBindingTargets,
+        ...inboundBindingTargets,
+      ];
 
-          await channel.assertExchange(
-            bindingExchangeName,
-            binding.exchangeType,
-            {
-              durable: binding.exchangeDurable,
-            },
-          );
-          await channel.assertQueue(targetQueueName, { durable: true });
-          await channel.bindQueue(
-            targetQueueName,
-            bindingExchangeName,
-            routingKey,
-          );
-        }
+      if (queueName && allBindingTargets.length > 0) {
+        await assertResolvedTopicBindings(channel, {
+          version,
+          targets: allBindingTargets,
+        });
       }
 
       if (queueName) {
+        await channel.prefetch(prefetch);
         await channel.consume(
           queueName,
           async (message: ConsumeMessage | null) => {
@@ -124,9 +114,11 @@ export class RabbitMqStartupService {
       this.logger.log(
         `RabbitMQ startup ready: exchange=${
           searchEventsExchangeName ?? 'none'
-        }, queue=${queueName ?? 'none'}, prefetch=${prefetch}, bindings=${
-          bindingTargets.length
-        }`,
+        }, queue=${
+          queueName ?? 'none'
+        }, prefetch=${prefetch}, outboundBindings=${
+          outboundBindingTargets.length
+        }, inboundBindings=${inboundBindingTargets.length}`,
       );
     } catch (error) {
       this.logger.error(

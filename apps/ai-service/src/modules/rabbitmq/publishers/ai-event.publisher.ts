@@ -39,7 +39,7 @@ export class AiEventPublisher {
       return;
     }
 
-    const routingKey = normalizeRoutingKey(envelope.eventType, version);
+    const routingKey = normalizeRoutingKey(envelope.eventType);
     const channel = this.connectionService.getChannel();
     const content = Buffer.from(JSON.stringify(envelope));
 

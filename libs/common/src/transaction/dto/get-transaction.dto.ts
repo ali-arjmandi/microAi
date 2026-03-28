@@ -1,4 +1,9 @@
-import { TransactionState } from '../transaction.types';
+import {
+  AiProcessingStatus,
+  ModerationStatus,
+  SearchIndexStatus,
+  TransactionState,
+} from '../transaction.types';
 
 export class GetTransactionDto {
   transactionId: string;
@@ -16,4 +21,10 @@ export class GetTransactionDto {
   sellerId: string;
 
   state: TransactionState;
+
+  aiStatus: AiProcessingStatus;
+
+  searchStatus: SearchIndexStatus;
+
+  moderationStatus: ModerationStatus;
 }

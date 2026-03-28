@@ -1,12 +1,18 @@
+import {
+  assertResolvedTopicBindings,
+  buildVersionedName,
+  resolveRabbitMqPrefetch,
+} from '@app/common';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ConsumeMessage } from 'amqplib';
+import { SearchOutcomeConsumer } from './consumers/search-outcome.consumer';
 import { RabbitMqConnectionService } from './rabbitmq.connection.service';
 import {
-  buildVersionedName,
+  getTransactionQueueInboundBindingTargets,
   getTransactionQueueName,
   getTransactionQueueBindingTargets,
   getTransactionOutboxExchange,
-  normalizeRoutingKey,
 } from './rabbitmq.config';
 
 @Injectable()
@@ -16,6 +22,7 @@ export class RabbitMqStartupService {
   constructor(
     private readonly connectionService: RabbitMqConnectionService,
     private readonly configService: ConfigService,
+    private readonly searchOutcomeConsumer: SearchOutcomeConsumer,
   ) {}
 
   async initialize(): Promise<void> {
@@ -25,7 +32,8 @@ export class RabbitMqStartupService {
       version,
     );
     const queueName = buildVersionedName(getTransactionQueueName(), version);
-    const bindingTargets = getTransactionQueueBindingTargets();
+    const outboundBindingTargets = getTransactionQueueBindingTargets();
+    const inboundBindingTargets = getTransactionQueueInboundBindingTargets();
 
     try {
       if (!transactionExchangeName && !queueName) {
@@ -47,38 +55,65 @@ export class RabbitMqStartupService {
         });
       }
 
-      if (queueName && bindingTargets.length > 0) {
-        for (const binding of bindingTargets) {
-          const bindingExchangeName = buildVersionedName(
-            binding.exchangeName,
-            version,
-          );
-          const targetQueueName = buildVersionedName(binding.queueName, version);
-          const routingKey = normalizeRoutingKey(binding.routingKey, version);
-          if (!bindingExchangeName || !targetQueueName) {
-            continue;
-          }
+      const allBindingTargets = [
+        ...outboundBindingTargets,
+        ...inboundBindingTargets,
+      ];
 
-          await channel.assertExchange(
-            bindingExchangeName,
-            binding.exchangeType,
-            {
-              durable: binding.exchangeDurable,
-            },
-          );
-          await channel.assertQueue(targetQueueName, { durable: true });
-          await channel.bindQueue(
-            targetQueueName,
-            bindingExchangeName,
-            routingKey,
-          );
-        }
+      if (queueName && allBindingTargets.length > 0) {
+        await assertResolvedTopicBindings(channel, {
+          version,
+          targets: allBindingTargets,
+        });
+      }
+
+      if (queueName) {
+        const prefetch = resolveRabbitMqPrefetch(
+          this.configService.get<number>('RABBITMQ_PREFETCH'),
+        );
+        await channel.prefetch(prefetch);
+        await channel.consume(
+          queueName,
+          async (message: ConsumeMessage | null) => {
+            if (!message) {
+              return;
+            }
+
+            try {
+              const decodedContent = message.content.toString('utf-8');
+              const payload = JSON.parse(decodedContent) as unknown;
+              const meta =
+                payload && typeof payload === 'object'
+                  ? (payload as { eventId?: string; eventType?: string })
+                  : undefined;
+              this.logger.debug(
+                JSON.stringify({
+                  msg: 'Consumed RabbitMQ message',
+                  queue: queueName,
+                  eventId: meta?.eventId,
+                  eventType: meta?.eventType,
+                }),
+              );
+              await this.searchOutcomeConsumer.handleMessage(payload);
+              channel.ack(message);
+            } catch (error) {
+              this.logger.error(
+                `Failed to process message from queue "${queueName}"`,
+                error instanceof Error ? error.stack : String(error),
+              );
+              channel.nack(message, false, false);
+            }
+          },
+          { noAck: false },
+        );
       }
 
       this.logger.log(
         `RabbitMQ startup ready: exchange=${
           transactionExchangeName ?? 'none'
-        }, queue=${queueName ?? 'none'}, bindings=${bindingTargets.length}`,
+        }, queue=${queueName ?? 'none'}, outboundBindings=${
+          outboundBindingTargets.length
+        }, inboundBindings=${inboundBindingTargets.length}`,
       );
     } catch (error) {
       this.logger.error(

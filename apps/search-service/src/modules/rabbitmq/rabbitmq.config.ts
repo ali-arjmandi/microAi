@@ -1,4 +1,8 @@
-import { rabbitmqStructureConfig } from '@app/common';
+import {
+  collectInboundBindingsForQueue,
+  expandOutboundBindings,
+  rabbitmqStructureConfig,
+} from '@app/common';
 
 export interface RabbitMqConfig {
   readonly url: string;
@@ -10,20 +14,7 @@ export const rabbitMqConfig = (): RabbitMqConfig => ({
   version: process.env.RABBITMQ_VERSION,
 });
 
-type ExchangeDefinition = {
-  name: string;
-  type: string;
-  durable: boolean;
-  bind: Record<string, readonly string[]>;
-};
-
-export interface QueueBindingTarget {
-  exchangeName: string;
-  exchangeType: string;
-  exchangeDurable: boolean;
-  queueName: string;
-  routingKey: string;
-}
+export type { QueueBindingTarget } from '@app/common';
 
 export const getSearchEventsExchange = (): string | null =>
   rabbitmqStructureConfig.apps.searchService.exchange.name;
@@ -31,59 +22,14 @@ export const getSearchEventsExchange = (): string | null =>
 export const getSearchQueueName = (): string | null =>
   rabbitmqStructureConfig.apps.searchService.queue;
 
-export const getSearchQueueBindingTargets = (): QueueBindingTarget[] => {
-  const searchExchange = rabbitmqStructureConfig.apps.searchService
-    .exchange as ExchangeDefinition;
+export const getSearchQueueBindingTargets = () =>
+  expandOutboundBindings(rabbitmqStructureConfig.apps.searchService.exchange);
 
-  const bindings: QueueBindingTarget[] = [];
-  for (const [routingKey, bindQueue] of Object.entries(searchExchange.bind)) {
-    for (const targetQueueName of bindQueue) {
-      bindings.push({
-        exchangeName: searchExchange.name,
-        exchangeType: searchExchange.type,
-        exchangeDurable: searchExchange.durable,
-        queueName: targetQueueName,
-        routingKey,
-      });
-    }
-  }
+/** Ensures queues this app binds for other services exist when search starts first. */
+export const getSearchQueueInboundBindingTargets = () =>
+  collectInboundBindingsForQueue(
+    rabbitmqStructureConfig.apps,
+    rabbitmqStructureConfig.apps.searchService.queue,
+  );
 
-  return bindings;
-};
-
-export const buildVersionedName = (
-  base: string | null | undefined,
-  version?: string,
-): string | null => {
-  const normalizedBase = base?.trim();
-  if (!normalizedBase) {
-    return null;
-  }
-
-  const normalizedVersion = version?.trim();
-  if (!normalizedVersion) {
-    return normalizedBase;
-  }
-
-  return `${normalizedBase}.${normalizedVersion}`;
-};
-
-export const normalizeRoutingKey = (
-  eventType: string,
-  version?: string,
-): string => {
-  const normalizedEventType = eventType.trim();
-  const parts = normalizedEventType.split('.');
-  const lastPart = parts[parts.length - 1];
-  const hasVersionSuffix =
-    (Boolean(version) && lastPart === version) || /^v\d+$/u.test(lastPart);
-  const baseEventType = hasVersionSuffix
-    ? parts.slice(0, -1).join('.')
-    : normalizedEventType;
-
-  if (!baseEventType) {
-    return normalizedEventType;
-  }
-
-  return buildVersionedName(baseEventType, version);
-};
+export { buildVersionedName, normalizeRoutingKey } from '@app/common';

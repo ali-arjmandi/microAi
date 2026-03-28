@@ -29,6 +29,7 @@ import { TransactionServiceStartupOrchestrator } from './transaction-service.sta
         OUTBOX_BATCH_SIZE: Joi.number().default(100),
         OUTBOX_MAX_RETRIES: Joi.number().default(5),
         OUTBOX_RETRY_BASE_MS: Joi.number().default(1000),
+        RABBITMQ_PREFETCH: Joi.number().integer().min(1).max(500).default(10),
       }),
     }),
     DatabaseModule,
