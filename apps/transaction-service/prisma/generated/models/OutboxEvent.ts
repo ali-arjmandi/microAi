@@ -223,7 +223,7 @@ export type OutboxEventGroupByOutputType = {
   _max: OutboxEventMaxAggregateOutputType | null
 }
 
-type GetOutboxEventGroupByPayload<T extends OutboxEventGroupByArgs> = Prisma.PrismaPromise<
+export type GetOutboxEventGroupByPayload<T extends OutboxEventGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<OutboxEventGroupByOutputType, T['by']> &
       {

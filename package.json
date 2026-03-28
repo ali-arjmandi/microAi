@@ -44,7 +44,8 @@
     "infra:up": "docker compose -f infra/docker/docker-compose.yml up -d",
     "infra:down": "docker compose -f infra/docker/docker-compose.yml down",
     "infra:logs": "docker compose -f infra/docker/docker-compose.yml logs -f",
-    "infra:ps": "docker compose -f infra/docker/docker-compose.yml ps"
+    "infra:ps": "docker compose -f infra/docker/docker-compose.yml ps",
+    "infra:delete-data": "docker compose -f infra/docker/docker-compose.yml down -v"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.17",

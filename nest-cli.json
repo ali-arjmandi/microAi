@@ -38,15 +38,6 @@
         "tsConfigPath": "libs/common/tsconfig.lib.json"
       }
     },
-    "microAgent": {
-      "type": "application",
-      "root": "apps/microAgent",
-      "entryFile": "main",
-      "sourceRoot": "apps/microAgent/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/microAgent/tsconfig.app.json"
-      }
-    },
     "search-service": {
       "type": "application",
       "root": "apps/search-service",
