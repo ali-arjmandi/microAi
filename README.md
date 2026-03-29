@@ -28,6 +28,42 @@ flowchart LR
   AI --> LLM[LLM_API]
 ```
 
+## RabbitMQ structure
+
+Topology is defined in code as [`libs/common/src/rabbitmq/rabbitmq-structure.config.ts`](libs/common/src/rabbitmq/rabbitmq-structure.config.ts). Each app asserts **topic** exchanges, durable queues, and bindings at startup. Exchange and queue names are usually **versioned** at runtime (e.g. `transaction.events.v1`) when `RABBITMQ_VERSION` is set—see the bootstrap helpers in [`libs/common/src/rabbitmq/rabbitmq-bootstrap.ts`](libs/common/src/rabbitmq/rabbitmq-bootstrap.ts).
+
+```mermaid
+flowchart TB
+  subgraph txnSvc [transaction_service]
+    OutboxPub[outbox_publisher]
+    TxQ[transaction_service.queue]
+  end
+  subgraph searchSvc [search_service]
+    SearchPub[search_event_publisher]
+    SearchQ[search_service.queue]
+  end
+  subgraph aiSvc [ai_service]
+    AiPub[ai_event_publisher]
+    AiQ[ai_service.queue]
+  end
+  ExTxn["transaction.events"]
+  ExAi["ai.events"]
+  ExSearch["search.events"]
+  OutboxPub --> ExTxn
+  ExTxn --> SearchQ
+  ExTxn --> AiQ
+  AiPub --> ExAi
+  ExAi --> SearchQ
+  SearchPub --> ExSearch
+  ExSearch --> TxQ
+```
+
+| Exchange | Type | Routing keys (examples) | Consumer queues |
+| -------- | ---- | ------------------------- | --------------- |
+| `transaction.events` | topic | `transaction.created`, `transaction.updated`, `transaction.deleted` | `search-service.queue` (all three); `ai-service.queue` (created + updated) |
+| `ai.events` | topic | `ai.enriched`, `ai.rejected` | `search-service.queue` |
+| `search.events` | topic | `search.index.updated`, `search.index.rejected` | `transaction-service.queue` |
+
 ## Repository layout
 
 ```
