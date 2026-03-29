@@ -75,7 +75,7 @@ infra/docker              # Docker Compose (Postgres, RabbitMQ, ES, Kibana, pgAd
    - `apps/search-service/.env.example` → `apps/search-service/.env`
    - `apps/ai-service/.env.example` → `apps/ai-service/.env`
 
-   Set `OPENROUTER_API_KEY` in `ai-service` before running the AI worker.
+   For `ai-service`, set **`OPENROUTER_API_KEY`**: sign up at [openrouter.ai](https://openrouter.ai), then create an API key under [Keys](https://openrouter.ai/keys) (you may need to add credits for paid models; free models depend on OpenRouter’s current offerings). Put the key in `apps/ai-service/.env` — see comments in [`apps/ai-service/.env.example`](apps/ai-service/.env.example).
 
 4. **Run services** (recommended order — each needs RabbitMQ/Postgres/ES where applicable):
 
