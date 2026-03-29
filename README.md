@@ -75,14 +75,7 @@ infra/docker              # Docker Compose (Postgres, RabbitMQ, ES, Kibana, pgAd
 
    Set `OPENROUTER_API_KEY` in `ai-service` before running the AI worker.
 
-4. **Database schema** (from repo root):
-
-   ```bash
-   yarn --cwd apps/transaction-service prisma:generate
-   yarn --cwd apps/transaction-service prisma:migrate:dev
-   ```
-
-5. **Run services** (recommended order — each needs RabbitMQ/Postgres/ES where applicable):
+4. **Run services** (recommended order — each needs RabbitMQ/Postgres/ES where applicable):
 
    ```bash
    yarn start:dev:transaction-service
@@ -91,7 +84,7 @@ infra/docker              # Docker Compose (Postgres, RabbitMQ, ES, Kibana, pgAd
    yarn start:dev:api-gateway
    ```
 
-6. **HTTP API docs** — with default gateway `PORT=3000`:
+5. **HTTP API docs** — with default gateway `PORT=3000`:
 
    [http://localhost:3000/docs](http://localhost:3000/docs)
 
