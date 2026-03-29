@@ -7,7 +7,7 @@ NestJS monorepo that models **multi-step transaction workflows**: a synchronous 
 - **API gateway (HTTP + Swagger)** exposes a stable public API; **gRPC** keeps internal calls fast and typed.
 - **PostgreSQL + Prisma** hold authoritative transaction state.
 - A **transactional outbox** ties DB commits to message publishing so you do not publish events that were never persisted (or skip publishing after a successful write).
-- **RabbitMQ** fans out domain events to **search-service** (indexing) and **ai-service** (LLM enrichment) without blocking the create path.
+- **RabbitMQ** fans out domain events to **search-service** (indexing) and **ai-service** (LLM enrichment) without blocking the create path; **transaction-service** also **consumes** messages (e.g. search index outcomes) to update authoritative state.
 - **Elasticsearch** is a **derived** search index, not the system of record.
 - **AI** runs as an async consumer with configurable timeouts, retries, and validated environment (see `ai-service`).
 
@@ -17,10 +17,12 @@ NestJS monorepo that models **multi-step transaction workflows**: a synchronous 
 flowchart LR
   Client[Client] -->|HTTP| Gateway[api_gateway]
   Gateway -->|gRPC| Tx[transaction_service]
+  Gateway -->|gRPC| Search[search_service]
   Tx --> PG[(PostgreSQL)]
   Tx --> Outbox[outbox]
-  Outbox --> RMQ[RabbitMQ]
-  RMQ --> Search[search_service]
+  Outbox -->|publish| RMQ[RabbitMQ]
+  RMQ -->|consume search outcomes| Tx
+  RMQ --> Search
   Search --> ES[(Elasticsearch)]
   RMQ --> AI[ai_service]
   AI --> LLM[LLM_API]
@@ -29,8 +31,8 @@ flowchart LR
 ## Repository layout
 
 ```
-apps/api-gateway          # HTTP API, Swagger, gRPC clients
-apps/transaction-service  # Prisma, gRPC server, outbox, RabbitMQ publish
+apps/api-gateway          # HTTP API, Swagger; gRPC to transaction + search
+apps/transaction-service  # Prisma, gRPC server, outbox, RabbitMQ publish + consume
 apps/search-service       # Elasticsearch indexing, gRPC, RabbitMQ consumer
 apps/ai-service           # RabbitMQ consumer, LLM client
 libs/common               # Shared types, events, proto, config
