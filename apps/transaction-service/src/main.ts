@@ -1,13 +1,31 @@
+import { execSync } from 'child_process';
+import { existsSync } from 'fs';
 import { NestFactory } from '@nestjs/core';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
 import { resolve } from 'path';
 import { config as dotenvConfig } from 'dotenv';
 import { TransactionServiceModule } from './transaction-service.module';
 
-async function bootstrap() {
-  dotenvConfig({
-    path: resolve(process.cwd(), 'apps/transaction-service/.env'),
+function runDatabaseMigrationsIfAvailable(serviceRoot: string): void {
+  const migrationsDir = resolve(serviceRoot, 'prisma', 'migrations');
+  if (!existsSync(migrationsDir)) {
+    return;
+  }
+  execSync('yarn run prisma:migrate:deploy', {
+    cwd: serviceRoot,
+    stdio: 'inherit',
+    env: process.env,
   });
+}
+
+async function bootstrap() {
+  const serviceRoot = resolve(process.cwd(), 'apps/transaction-service');
+
+  dotenvConfig({
+    path: resolve(serviceRoot, '.env'),
+  });
+
+  runDatabaseMigrationsIfAvailable(serviceRoot);
 
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     TransactionServiceModule,
